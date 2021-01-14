@@ -7,6 +7,8 @@ services:
       dockerfile: "./docker/devbox.dockerfile"
       context: "."
     image: "gbq_devbox"
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
     volumes:
       - ./:/app
 
