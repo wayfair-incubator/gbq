@@ -1,5 +1,5 @@
+from gbq.util import BigQueryUtil
+
 __version__ = "0.1.0"
-
-
-def greeting():
-    return "hello, world"
+__author__ = "Jash Parekh <jparekh1@wayfair.com>"
+__all__ = [BigQueryUtil]  # type: ignore
