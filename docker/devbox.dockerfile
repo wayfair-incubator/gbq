@@ -20,9 +20,9 @@ RUN mkdir /app && chown ${UID}:${GID} /app
 
 USER ${_USER}
 
-COPY ./requirements*.txt /app/
+COPY ./requirements*.txt ./requirements.lock /app/
 WORKDIR /app
 
-RUN pip install -r requirements.txt -r requirements-test.txt
+RUN pip install -r requirements.lock -r requirements-test.txt
 
 CMD bash

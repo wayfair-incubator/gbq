@@ -15,3 +15,8 @@ services:
   test:
     <<: *devbox
     command: "docker/run_tests.sh --format-code"
+
+  lock-requirements:
+    <<: *devbox
+    entrypoint: "/bin/bash"
+    command: "docker/lock_requirements.sh"
