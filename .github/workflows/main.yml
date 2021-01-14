@@ -126,11 +126,11 @@ jobs:
           # Use always() to always run this step to publish test results when there are test failures
           if: ${{ always() }}
 
-        - name: Publish coverage results to Codecov
-          uses: codecov/codecov-action@v1.0.13
-          with:
-            file: coverage-${{ matrix.python-version }}.xml
-            fail_ci_if_error: true
+#        - name: Publish coverage results to Codecov
+#          uses: codecov/codecov-action@v1.0.13
+#          with:
+#            file: coverage-${{ matrix.python-version }}.xml
+#            fail_ci_if_error: true
 
   verify-wheel:
     runs-on: ubuntu-latest
