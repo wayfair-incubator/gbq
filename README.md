@@ -7,11 +7,9 @@ TODO: PyPi Release Badge
 
 # GBQ
 
-Python wrapper for Google BigQuery
+Python wrapper for interacting Google BigQuery.
 
-## CI
-
-TODO: Add CI documentation.
+This package provides an interface by wrapping Google's low level library. It exposes options to provide input as json objects which can be used for various CI/CD tools.
 
 ## Usage
 
@@ -36,23 +34,6 @@ docker-compose run --rm devbox
 ```
 
 In the devbox environment you'll be able to enter a python shell and import `gbq` or any dependencies.
-
-## Debugging
-
-The docker container has [pdb++][pdbpp-home] install that can be used as a debugger. (However, you are welcome to set up
-a different debugger if you would like.)
-
-This allows you to easily create a breakpoint anywhere in the code.
-
-```python
-def my_function():
-    breakpoint()
-    ...
-```
-
-When your the code, you will drop into an interactive `pdb++` debugger.
-
-See the documentation on [pdb][pdb-docs] and [pdb++][pdbpp-docs] for more information.
 
 ## Testing
 
@@ -107,7 +88,7 @@ Once the package is ready to be released, there are a few things that need to be
 2. Ensure this change has been merged to the default branch with all the code that should be included in the release.
 3. Create a new GitHub release. The tag should be named: `vX.Y.Z`
 
-This will trigger the CI system to build a wheel and a source distributions of the package and push them to
+This will trigger the CI system to build a wheel, and a source distributions of the package and push them to
 [PyPI][pypi].
 
 ## Documentation
