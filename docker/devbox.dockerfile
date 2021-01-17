@@ -20,7 +20,8 @@ RUN mkdir /app && chown ${UID}:${GID} /app
 
 USER ${_USER}
 
-COPY ./requirements*.txt ./requirements.lock /app/
+COPY --chown=${UID}:${GID} ./requirements* /app/
+COPY --chown=${UID}:${GID} ./util /app/util/
 WORKDIR /app
 
 RUN pip install -r requirements.lock -r requirements-test.txt
