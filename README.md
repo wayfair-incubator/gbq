@@ -13,7 +13,30 @@ This package provides an interface by wrapping Google's low level library. It ex
 
 ## Usage
 
-TODO: Add usage documentation.
+### Basic Usage
+
+```python
+from gbq import BigQueryUtil
+
+# BigQuery project id as listed in the Google Developers Console.
+project_id = 'project_id'
+
+# BigQuery dataset id as listed in the Google Developers Console.
+dataset_id = 'dataset_id'
+
+# BigQuery table/view id as listed in the Google Developers Console.
+structure_id = 'structure_id'
+
+# BigQuery structure definition as defined in the Google Developers Console.
+json_schema = {"type": "table", "schema": [{"id": "integer"}]}
+
+# Service account email address as listed in the Google Developers Console.
+svc_account = '{"type": "service_account",   "project_id": "project_id"}'
+
+bq = BigQueryUtil(svc_account=svc_account, project=project_id)
+
+bq.upsert_structure(project_id, dataset_id, structure_id, json_schema)
+```
 
 ## Develop
 
@@ -74,7 +97,7 @@ grabs the version from `__init__.py` without actually importing.
 ### Requirements
 
 * **requirements.txt** - Lists all direct dependencies (packages imported by the library).
-* **Requirements-test.txt** - Lists all direct requirements needed to run the test suite & lints.
+* **requirements-test.txt** - Lists all direct requirements needed to run the test suite & lints.
 
 ## Publishing the Package
 
@@ -93,8 +116,7 @@ This will trigger the CI system to build a wheel, and a source distributions of 
 
 ## Documentation
 
-TODO: Use Github Pages to host documentation.
-Check out the [project documentation][gbq-docs]
+Check out the [project documentation](https://wayfair-incubator.github.io/gbq/)
 
 [ci]: https://github.com/wayfair-incubator/gbq/actions
 [codecov]: https://codecov.io/gh/wayfair-incubator/gbq

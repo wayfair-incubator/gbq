@@ -52,7 +52,7 @@ def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
     return schema
 
 
-def get_bq_schema_from_json(raw_data: dict) -> List[SchemaField]:
+def get_bq_schema_from_record(raw_data: dict) -> List[SchemaField]:
     """
     Function builds a BQ Table schema from raw data of the table.
     """
@@ -74,7 +74,6 @@ def _check_if_map(value: dict):
     return True
 
 
-# flake8: noqa: C901
 def _flatten_data(data: dict):
     """
     Function flattens the data.
