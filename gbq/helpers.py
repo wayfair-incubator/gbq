@@ -146,12 +146,11 @@ def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> List[SchemaField]:
 
 
 def _handle_exception(key: str, schema_field: SchemaField, value: List[Dict]):
-    # We are expecting a REPEATED field
-    if value and len(value) > 0:
+    if isinstance(value, list) and not value:
+        # Managing empty list case
+        schema_field = SchemaField(key, "RECORD", mode="REPEATED")  # REPEATED
+    else:
         schema_field = SchemaField(
             key, field_type[type(value[0])], mode="REPEATED"
         )  # REPEATED
-    elif isinstance(value, list) and not value:
-        # Managing empty list case
-        schema_field = SchemaField(key, "RECORD", mode="REPEATED")  # REPEATED
     return schema_field

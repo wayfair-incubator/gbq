@@ -164,7 +164,7 @@ class BigQuery:
                 fields_to_update.append("schema")
                 schema = get_bq_schema_from_json_schema(structure.table_schema)
                 bq_structure.schema = schema
-            elif structure.type == StructureType.view:
+            else:
                 fields_to_update.append("view_query")
                 bq_structure.view_query = structure.view_query
 
@@ -208,12 +208,10 @@ class BigQuery:
         Returns:
             Structure: An object of Structure.
         """
-        if isinstance(json_schema, dict):
-            return Structure(**json_schema)
-        elif isinstance(json_schema, list):
+        if isinstance(json_schema, list):
             return Structure(**{"schema": json_schema})
-
-        return  # type: ignore
+        else:
+            return Structure(**json_schema)
 
     def _handle_create_structure(
         self, dataset: str, project: str, structure_id: str, structure: Structure
@@ -281,7 +279,7 @@ class BigQuery:
         if partition_scheme.type.value == PartitionType.time.value:
             time_partitioning = self._get_time_partitioned_scheme(partition_scheme)
             bq_structure.time_partitioning = time_partitioning
-        elif partition_scheme.type.value == PartitionType.range.value:
+        else:
             range_partitioning = self._get_range_partitioned_scheme(partition_scheme)
             bq_structure.range_partitioning = range_partitioning
 
