@@ -12,6 +12,7 @@ from gbq.dto import (
     Structure,
     TimeDefinition,
 )
+from gbq.exceptions import InvalidDefinitionException
 from tests.fixtures import Table
 
 
@@ -65,6 +66,13 @@ def test_get_structure(bq, table_with_schema):
     bq.bq_client.get_table.return_value = table_with_schema
     response = bq.get_structure("project", "dataset", "structure")
     assert response == table_with_schema
+
+
+def test_upsert_structure_with_invalid_definition(bq, nested_json_schema, table):
+    with pytest.raises(InvalidDefinitionException):
+        bq.upsert_structure(
+            json_schema=nested_json_schema,
+        )
 
 
 def test_upsert_structure_with_no_partition(bq, nested_json_schema, table):

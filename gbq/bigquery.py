@@ -185,6 +185,7 @@ class BigQuery:
         else:
             fields_to_update.append("view_query")
             bq_structure.view_query = structure.view_query
+
         if structure.labels and structure.labels != bq_structure.labels:
             fields_to_update.append("labels")
             bq_structure.labels = structure.labels
