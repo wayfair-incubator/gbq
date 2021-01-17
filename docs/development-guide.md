@@ -5,7 +5,6 @@ and how to work with the code base.
 
 Before you dive into this, it is best to read:
 
-* The whole [Usage Guide][usage-guide]
 * The [Code of Conduct][code of conduct]
 * The [Contributing][contributing] guide
 

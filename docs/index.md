@@ -18,7 +18,7 @@ To learn the basics of how to start using `gbq`, read the [Getting Started][gett
 
 ## Detailed Documentation
 
-To learn more about the various ways `gbq` can be used, read the [Usage Guide][usage_guide] page.
+To learn more about the various ways `gbq` can be used, read the Usage Guide page.
 
 ## API Reference
 
@@ -27,5 +27,4 @@ To find detailed information about a specific function or class, read the [API R
 [ci]: https://github.com/wayfair-incubator/gbq/actions
 [codecov]: https://codecov.io/gh/wayfair-incubator/gbq
 [getting_started]: getting-started.md
-[usage_guide]: usage-guide.md
 [api_reference]: api.md

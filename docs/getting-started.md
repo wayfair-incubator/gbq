@@ -12,6 +12,4 @@ python -m pip install gbq
 
 TODO
 
-Read the [Usage Guide][usage_guide] for a more detailed descriptions of the ways `gbq` can be used.
-
-[usage_guide]: usage-guide.md
+Read the Usage Guide for a more detailed descriptions of the ways `gbq` can be used.

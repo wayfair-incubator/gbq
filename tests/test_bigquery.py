@@ -4,6 +4,7 @@ from google.cloud import bigquery
 from google.cloud.bigquery import PartitionRange
 from pydantic import ValidationError
 
+from gbq.bigquery import BigQuery
 from gbq.dto import (
     Partition,
     RangeDefinition,
@@ -11,31 +12,32 @@ from gbq.dto import (
     Structure,
     TimeDefinition,
 )
-from gbq.util import BigQueryUtil
+from gbq.exceptions import InvalidDefinitionException
 from tests.fixtures import Table
 
 
 @pytest.fixture()
-def bq(mocker) -> BigQueryUtil:
+def bq(mocker) -> BigQuery:
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.util.bigquery.Client")
-    return BigQueryUtil('{"secret": "secret"}', "project")
+    mocker.patch("gbq.bigquery.bigquery.Client")
+    return BigQuery('{"secret": "secret"}', "project")
 
 
 @pytest.fixture()
-def table(mocker) -> Table:
+def table(mocker, schema_fields) -> Table:
     table = Table(
         project="project",
         dataset_id="dataset",
         table_id="structure",
         table_type="TABLE",
+        schema=schema_fields,
     )
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.util.BigQueryUtil._add_partitioning_scheme")
+    mocker.patch("gbq.bigquery.BigQuery._add_partitioning_scheme")
     return table
 
 
@@ -43,8 +45,8 @@ def test_create_bigquery_class(mocker):
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.util.bigquery.Client")
-    BigQueryUtil('{"secret": "secret"}', "project")
+    mocker.patch("gbq.bigquery.bigquery.Client")
+    BigQuery('{"secret": "secret"}', "project")
     assert True
 
 
@@ -67,10 +69,28 @@ def test_get_structure(bq, table_with_schema):
     assert response == table_with_schema
 
 
-def test_upsert_structure_with_no_partition(bq, nested_json_schema, table):
-    bq.upsert_structure("project", "dataset", "structure", nested_json_schema)
+def test_upsert_structure_with_invalid_definition(
+    bq, nested_json_schema_with_time_partition, table
+):
+    with pytest.raises(InvalidDefinitionException):
+        bq.upsert_structure(
+            json_schema=nested_json_schema_with_time_partition,
+        )
+
+
+def test_upsert_structure_with_no_partition(
+    mocker, bq, nested_json_schema_with_clustering, table
+):
+    mocker.patch("gbq.bigquery.BigQuery.upsert_structure").return_value = table
+    structure = bq.upsert_structure(
+        json_schema=nested_json_schema_with_clustering,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
+    )
     bq._add_partitioning_scheme.assert_not_called()
-    assert True
+    assert not structure.view_query
+    assert structure.schema
 
 
 def test_upsert_structure_with_default_time_partition(
@@ -78,7 +98,10 @@ def test_upsert_structure_with_default_time_partition(
 ):
     bq.bq_client.get_table.side_effect = NotFound("")
     bq.upsert_structure(
-        "project", "dataset", "structure", nested_json_schema_with_time_partition
+        json_schema=nested_json_schema_with_time_partition,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     bq._add_partitioning_scheme.assert_called_once()
@@ -91,32 +114,34 @@ def test_upsert_structure_with_incorrect_partition(
     bq.bq_client.get_table.side_effect = NotFound("")
     with pytest.raises(ValidationError):
         bq.upsert_structure(
-            "project",
-            "dataset",
-            "structure",
-            nested_json_schema_with_incorrect_partition,
+            json_schema=nested_json_schema_with_incorrect_partition,
+            project_id="project",
+            dataset_id="dataset",
+            structure_id="structure",
         )
 
 
 def test_create_table_with_clustering(bq, nested_json_schema_with_clustering, table):
     bq.bq_client.get_table.side_effect = NotFound("")
     table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_clustering,
+        json_schema=nested_json_schema_with_clustering,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert table.clustering_fields == nested_json_schema_with_clustering["clustering"]
 
 
-def test_create_table_without_clustering(bq, nested_json_schema, table):
+def test_create_table_without_clustering(
+    bq, nested_json_schema_with_time_partition, table
+):
     bq.bq_client.get_table.side_effect = NotFound("")
     table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema,
+        json_schema=nested_json_schema_with_time_partition,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert not table.clustering_fields
@@ -124,56 +149,47 @@ def test_create_table_without_clustering(bq, nested_json_schema, table):
 
 def test_update_table_with_clustering(bq, nested_json_schema_with_clustering, table):
     table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_clustering,
+        json_schema=nested_json_schema_with_clustering,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert table.clustering_fields == nested_json_schema_with_clustering["clustering"]
 
 
-def test_update_table_without_clustering(mocker, bq, nested_json_schema, table):
-    mocker.patch("gbq.util.BigQueryUtil.upsert_structure").return_value = table
+def test_update_table_without_clustering_and_labels(
+    mocker, bq, nested_json_schema, table
+):
+    mocker.patch("gbq.bigquery.BigQuery.upsert_structure").return_value = table
     response_table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema,
+        json_schema=nested_json_schema,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert not response_table.clustering_fields
+    assert not table.labels
 
 
 def test_create_table_with_labels(bq, nested_json_schema_with_labels, table):
     structure = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_labels,
+        json_schema=nested_json_schema_with_labels,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert structure.labels == nested_json_schema_with_labels["labels"]
 
 
-def test_create_table_without_labels(mocker, bq, nested_json_schema, table):
-    mocker.patch("gbq.util.BigQueryUtil.upsert_structure").return_value = table
-    table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema,
-    )
-
-    assert not table.labels
-
-
 def test_update_table_with_same_labels(bq, nested_json_schema_with_labels, table):
     table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_labels,
+        json_schema=nested_json_schema_with_labels,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert table.labels == nested_json_schema_with_labels["labels"]
@@ -181,10 +197,10 @@ def test_update_table_with_same_labels(bq, nested_json_schema_with_labels, table
 
 def test_update_table_without_labels(bq, nested_json_schema_with_labels, table):
     structure = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_labels,
+        json_schema=nested_json_schema_with_labels,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert structure.labels == nested_json_schema_with_labels["labels"]
@@ -192,22 +208,22 @@ def test_update_table_without_labels(bq, nested_json_schema_with_labels, table):
 
 def test_create_table_with_description(bq, nested_json_schema_with_description, table):
     structure = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_description,
+        json_schema=nested_json_schema_with_description,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert structure.description == nested_json_schema_with_description["description"]
 
 
 def test_create_table_without_description(mocker, bq, nested_json_schema, table):
-    mocker.patch("gbq.util.BigQueryUtil.upsert_structure").return_value = table
+    mocker.patch("gbq.bigquery.BigQuery.upsert_structure").return_value = table
     table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema,
+        json_schema=nested_json_schema,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert not table.description
@@ -217,10 +233,10 @@ def test_update_table_with_same_description(
     bq, nested_json_schema_with_description, table
 ):
     table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_description,
+        json_schema=nested_json_schema_with_description,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert table.description == nested_json_schema_with_description["description"]
@@ -230,10 +246,10 @@ def test_update_table_without_description(
     bq, nested_json_schema_with_description, table
 ):
     response_table = bq.upsert_structure(
-        "project",
-        "dataset",
-        "structure",
-        nested_json_schema_with_description,
+        json_schema=nested_json_schema_with_description,
+        project_id="project",
+        dataset_id="dataset",
+        structure_id="structure",
     )
 
     assert (
@@ -242,7 +258,7 @@ def test_update_table_without_description(
 
 
 def test__get_table_schema(bq, nested_json_schema):
-    expected = Structure(**{"schema": nested_json_schema})
+    expected = Structure(**{"schema": nested_json_schema, "type": "table"})
     assert bq._get_structure(nested_json_schema) == expected
 
 
@@ -321,7 +337,7 @@ def test__handle_create_structure_table_with_partition_and_clustering(
 
     expected_time_partition = bigquery.TimePartitioning(type_="DAY")
 
-    assert bq_structure.clustering_fields == ["id", "supplier_id"]
+    assert bq_structure.clustering_fields == ["id"]
     assert bq_structure.time_partitioning == expected_time_partition
     assert not bq_structure.range_partitioning
 
