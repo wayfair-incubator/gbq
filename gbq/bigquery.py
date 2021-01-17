@@ -16,9 +16,9 @@ from gbq.dto import (
 from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
 
 
-class BigQueryUtil:
+class BigQuery:
     """
-    BigQueryUtil represent a BigQuery Util resource.
+    BigQuery represent a BigQuery utility resource.
 
     Args:
         svc_account (str):

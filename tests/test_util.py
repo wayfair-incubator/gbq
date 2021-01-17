@@ -4,6 +4,7 @@ from google.cloud import bigquery
 from google.cloud.bigquery import PartitionRange
 from pydantic import ValidationError
 
+from gbq.bigquery import BigQuery
 from gbq.dto import (
     Partition,
     RangeDefinition,
@@ -11,17 +12,16 @@ from gbq.dto import (
     Structure,
     TimeDefinition,
 )
-from gbq.util import BigQueryUtil
 from tests.fixtures import Table
 
 
 @pytest.fixture()
-def bq(mocker) -> BigQueryUtil:
+def bq(mocker) -> BigQuery:
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.util.bigquery.Client")
-    return BigQueryUtil('{"secret": "secret"}', "project")
+    mocker.patch("gbq.bigquery.bigquery.Client")
+    return BigQuery('{"secret": "secret"}', "project")
 
 
 @pytest.fixture()
@@ -35,7 +35,7 @@ def table(mocker) -> Table:
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.util.BigQueryUtil._add_partitioning_scheme")
+    mocker.patch("gbq.bigquery.BigQuery._add_partitioning_scheme")
     return table
 
 
@@ -43,8 +43,8 @@ def test_create_bigquery_class(mocker):
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.util.bigquery.Client")
-    BigQueryUtil('{"secret": "secret"}', "project")
+    mocker.patch("gbq.bigquery.bigquery.Client")
+    BigQuery('{"secret": "secret"}', "project")
     assert True
 
 
@@ -134,7 +134,7 @@ def test_update_table_with_clustering(bq, nested_json_schema_with_clustering, ta
 
 
 def test_update_table_without_clustering(mocker, bq, nested_json_schema, table):
-    mocker.patch("gbq.util.BigQueryUtil.upsert_structure").return_value = table
+    mocker.patch("gbq.bigquery.BigQuery.upsert_structure").return_value = table
     response_table = bq.upsert_structure(
         "project",
         "dataset",
@@ -157,7 +157,7 @@ def test_create_table_with_labels(bq, nested_json_schema_with_labels, table):
 
 
 def test_create_table_without_labels(mocker, bq, nested_json_schema, table):
-    mocker.patch("gbq.util.BigQueryUtil.upsert_structure").return_value = table
+    mocker.patch("gbq.bigquery.BigQuery.upsert_structure").return_value = table
     table = bq.upsert_structure(
         "project",
         "dataset",
@@ -202,7 +202,7 @@ def test_create_table_with_description(bq, nested_json_schema_with_description, 
 
 
 def test_create_table_without_description(mocker, bq, nested_json_schema, table):
-    mocker.patch("gbq.util.BigQueryUtil.upsert_structure").return_value = table
+    mocker.patch("gbq.bigquery.BigQuery.upsert_structure").return_value = table
     table = bq.upsert_structure(
         "project",
         "dataset",
@@ -321,7 +321,7 @@ def test__handle_create_structure_table_with_partition_and_clustering(
 
     expected_time_partition = bigquery.TimePartitioning(type_="DAY")
 
-    assert bq_structure.clustering_fields == ["id", "supplier_id"]
+    assert bq_structure.clustering_fields == ["id"]
     assert bq_structure.time_partitioning == expected_time_partition
     assert not bq_structure.range_partitioning
 

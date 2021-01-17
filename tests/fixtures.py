@@ -56,13 +56,13 @@ class Table:
 def nested_json_schema():
     return [
         {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
-        {"name": "supplier_id", "mode": "NULLABLE", "type": "INTEGER"},
+        {"name": "username", "mode": "NULLABLE", "type": "STRING"},
         {
             "fields": [
                 {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
-                {"name": "warehouse_id", "mode": "NULLABLE", "type": "INTEGER"},
+                {"name": "street", "mode": "NULLABLE", "type": "STRING"},
             ],
-            "name": "shipments",
+            "name": "address",
             "mode": "REPEATED",
             "type": "RECORD",
         },
@@ -89,7 +89,7 @@ def nested_json_schema_with_incorrect_partition(nested_json_schema):
 def nested_json_schema_with_clustering(nested_json_schema):
     return {
         "schema": nested_json_schema,
-        "clustering": ["id", "supplier_id"],
+        "clustering": ["id"],
     }
 
 
@@ -97,7 +97,7 @@ def nested_json_schema_with_clustering(nested_json_schema):
 def nested_json_schema_with_partition_and_clustering(nested_json_schema):
     return {
         "schema": nested_json_schema,
-        "clustering": ["id", "supplier_id"],
+        "clustering": ["id"],
         "partition": {"type": "time", "definition": {"type": "DAY"}},
     }
 
@@ -154,8 +154,7 @@ def views() -> List[Table]:
 def schema_fields() -> List[SchemaField]:
     return [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="supplier_id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="shipment_id", mode="NULLABLE", field_type="INTEGER"),
+        SchemaField(name="username", mode="NULLABLE", field_type="STRING"),
     ]
 
 
@@ -163,13 +162,13 @@ def schema_fields() -> List[SchemaField]:
 def nested_schema_fields() -> List[SchemaField]:
     nested_fields = [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="warehouse_id", mode="NULLABLE", field_type="INTEGER"),
+        SchemaField(name="username", mode="NULLABLE", field_type="STRING"),
     ]
     return [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="supplier_id", mode="NULLABLE", field_type="INTEGER"),
+        SchemaField(name="street", mode="NULLABLE", field_type="STRING"),
         SchemaField(
-            name="shipments", mode="REPEATED", field_type="RECORD", fields=nested_fields
+            name="address", mode="REPEATED", field_type="RECORD", fields=nested_fields
         ),
     ]
 
