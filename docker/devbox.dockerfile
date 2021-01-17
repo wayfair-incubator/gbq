@@ -20,7 +20,7 @@ RUN mkdir /app && chown ${UID}:${GID} /app
 
 USER ${_USER}
 
-COPY --chown=${UID}:${GID} ./requirements*.txt /app/
+COPY --chown=${UID}:${GID} ./requirements* /app/
 COPY --chown=${UID}:${GID} ./util /app/util/
 WORKDIR /app
 
