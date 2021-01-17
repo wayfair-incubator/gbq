@@ -7,8 +7,8 @@ from gbq.helpers import (
     _check_if_map,
     _map_raw_dictionary_to_bq_schema,
     get_bq_credentials,
-    get_bq_schema_from_json,
     get_bq_schema_from_json_schema,
+    get_bq_schema_from_record,
 )
 
 
@@ -113,7 +113,7 @@ def test_get_bq_schema_from_raw_data_dictionary_list_of_int():
         "warehouses": [1, 2, 3],
     }
 
-    response = get_bq_schema_from_json(raw_input_data)
+    response = get_bq_schema_from_record(raw_input_data)
     assert response == expected
 
 
@@ -140,7 +140,7 @@ def test_get_bq_schema_from_raw_data_dictionary_list_of_dicts():
         ],
     }
 
-    response = get_bq_schema_from_json(raw_input_data)
+    response = get_bq_schema_from_record(raw_input_data)
     assert response == expected
 
 
@@ -155,7 +155,7 @@ def test_get_bq_schema_from_raw_data_dictionary_empty_list():
         "warehouses": [],
     }
 
-    response = get_bq_schema_from_json(raw_input_data)
+    response = get_bq_schema_from_record(raw_input_data)
     assert response == expected
 
 
@@ -190,7 +190,7 @@ def test_get_bq_schema_from_raw_data_dictionary_maps(
         "group_ids": {"5": "5", "10": "10", "11": "11"},
     }
 
-    response = get_bq_schema_from_json(raw_input_data)
+    response = get_bq_schema_from_record(raw_input_data)
     assert response == expected
 
 
@@ -217,5 +217,5 @@ def test_get_bq_schema_from_raw_data_dictionary_dict():
         },
     }
 
-    response = get_bq_schema_from_json(raw_input_data)
+    response = get_bq_schema_from_record(raw_input_data)
     assert response == expected
