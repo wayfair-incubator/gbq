@@ -74,6 +74,7 @@ def nested_json_schema_with_time_partition(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "partition": {"type": "time", "definition": {"type": "DAY"}},
+        "type": "table",
     }
 
 
@@ -82,6 +83,7 @@ def nested_json_schema_with_incorrect_partition(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "partition": {"type": "time", "definition": {"type": "day"}},
+        "type": "table",
     }
 
 
@@ -90,6 +92,7 @@ def nested_json_schema_with_clustering(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "clustering": ["id"],
+        "type": "table",
     }
 
 
@@ -99,6 +102,7 @@ def nested_json_schema_with_partition_and_clustering(nested_json_schema):
         "schema": nested_json_schema,
         "clustering": ["id"],
         "partition": {"type": "time", "definition": {"type": "DAY"}},
+        "type": "table",
     }
 
 
@@ -107,6 +111,7 @@ def nested_json_schema_with_labels(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "labels": {"test": "test"},
+        "type": "table",
     }
 
 
@@ -115,6 +120,7 @@ def nested_json_schema_with_description(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "description": "This is a table",
+        "type": "table",
     }
 
 
@@ -191,7 +197,12 @@ def sql_schema() -> str:
 
 @pytest.fixture()
 def table_structure(nested_json_schema) -> Structure:
-    return Structure(**{"schema": nested_json_schema})
+    return Structure(
+        **{
+            "schema": nested_json_schema,
+            "type": "table",
+        }
+    )
 
 
 @pytest.fixture()
@@ -203,11 +214,16 @@ def table_structure_with_clustering_partition(
 
 @pytest.fixture()
 def view_structure(sql_schema) -> Structure:
-    return Structure(**{"view_query": sql_schema})
+    return Structure(**{"view_query": sql_schema, "type": "view"})
 
 
 @pytest.fixture()
 def view_structure_with_labels_and_description(sql_schema) -> Structure:
     return Structure(
-        **{"view_query": sql_schema, "labels": {"test": "test"}, "description": "test"}
+        **{
+            "view_query": sql_schema,
+            "labels": {"test": "test"},
+            "description": "test",
+            "type": "view",
+        }
     )
