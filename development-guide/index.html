@@ -14,7 +14,7 @@
     
     
       
-        <title>Getting Started - gbq Documentation</title>
+        <title>Development Guide - gbq Documentation</title>
       
     
     
@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#development-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +94,7 @@
         <div class="md-header-nav__topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              Development Guide
             
           </span>
         </div>
@@ -180,56 +180,11 @@
       
 
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Getting Started
-        <span class="md-nav__icon md-icon"></span>
-      </label>
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../getting-started/" class="md-nav__link">
       Getting Started
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#basic-usage-examples" class="md-nav__link">
-    Basic Usage Examples
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
     
@@ -251,11 +206,104 @@
       
 
 
+  
 
-  <li class="md-nav__item">
-    <a href="../development-guide/" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Development Guide
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
       Development Guide
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    Docker
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging" class="md-nav__link">
+    Debugging
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stages" class="md-nav__link">
+    Stages
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setuppy" class="md-nav__link">
+    setup.py
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-the-package" class="md-nav__link">
+    Publishing the Package
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-integration-pipeline" class="md-nav__link">
+    Continuous Integration Pipeline
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
     
@@ -297,15 +345,63 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
+  <a href="#docker" class="md-nav__link">
+    Docker
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-usage-examples" class="md-nav__link">
-    Basic Usage Examples
+  <a href="#debugging" class="md-nav__link">
+    Debugging
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stages" class="md-nav__link">
+    Stages
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setuppy" class="md-nav__link">
+    setup.py
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    Requirements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-the-package" class="md-nav__link">
+    Publishing the Package
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#continuous-integration-pipeline" class="md-nav__link">
+    Continuous Integration Pipeline
   </a>
   
 </li>
@@ -322,19 +418,94 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/wayfair-incubator/gbq/edit/main/docs/getting-started.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/wayfair-incubator/gbq/edit/main/docs/development-guide.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="getting-started">Getting Started</h1>
-<h2 id="installation">Installation</h2>
-<p>To install <code>gbq</code>, simply run this simple command in your terminal of choice:</p>
-<div class="highlight"><pre><span></span><code>python -m pip install gbq
+                <h1 id="development-guide">Development Guide</h1>
+<p>Welcome! Thank you for wanting to make the project better. This section provides an overview on how repository structure
+and how to work with the code base.</p>
+<p>Before you dive into this, it is best to read:</p>
+<ul>
+<li>The whole <a href="../usage-guide/#usage-guide">Usage Guide</a></li>
+<li>The <a href="https://github.com/wayfair-incubator/gbq/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a></li>
+<li>The <a href="https://github.com/wayfair-incubator/gbq/blob/main/CONTRIBUTING.md">Contributing</a> guide</li>
+</ul>
+<h2 id="docker">Docker</h2>
+<p>The GBQ project uses Docker to ease setting up a consistent development environment. The Docker documentation has
+details on how to <a href="https://docs.docker.com/install/">install docker</a> on your computer.</p>
+<p>Once that is configured, the test suite can be run locally:</p>
+<div class="highlight"><pre><span></span><code>docker-compose run --rm <span class="nb">test</span>
 </code></pre></div>
-<h2 id="basic-usage-examples">Basic Usage Examples</h2>
-<p>TODO</p>
-<p>Read the <a href="../usage-guide/">Usage Guide</a> for a more detailed descriptions of the ways <code>gbq</code> can be used.</p>
+<p>If you want to be able to execute code in the container:</p>
+<div class="highlight"><pre><span></span><code>docker-compose run --rm devbox
+<span class="o">(</span>your code here<span class="o">)</span>
+</code></pre></div>
+<p>In the devbox environment you'll be able to enter a python shell and import <code>gbq</code> or any dependencies.</p>
+<h2 id="debugging">Debugging</h2>
+<p>The docker container has <a href="https://github.com/pdbpp/pdbpp">pdb++</a> install that can be used as a debugger. (However, you are welcome to set up
+a different debugger if you would like.)</p>
+<p>This allows you to easily create a breakpoint anywhere in the code.</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">my_function</span><span class="p">():</span>
+    <span class="n">breakpoint</span><span class="p">()</span>
+    <span class="o">...</span>
+</code></pre></div>
+<p>When your the code, you will drop into an interactive <code>pdb++</code> debugger.</p>
+<p>See the documentation on <a href="https://docs.python.org/3/library/pdb.html">pdb</a> and <a href="https://github.com/pdbpp/pdbpp#usage">pdb++</a> for more information.</p>
+<h2 id="testing">Testing</h2>
+<p>You'll be unable to merge code unless the linting and tests pass. You can run these in your container via:</p>
+<div class="highlight"><pre><span></span><code>docker-compose run --rm <span class="nb">test</span>
+</code></pre></div>
+<p>This will run the same tests, linting, and code coverage that are run by the CI pipeline. The only difference is that,
+when run locally, <code>black</code> and <code>isort</code> are configured to automatically correct issues they detect.</p>
+<p>Generally we should endeavor to write tests for every feature. Every new feature branch should increase the test
+coverage rather than decreasing it.</p>
+<p>We use <a href="https://docs.pytest.org/en/latest/">pytest</a> as our testing framework.</p>
+<h4 id="stages">Stages</h4>
+<p>To customize / override a specific testing stage, please read the documentation specific to that tool:</p>
+<ol>
+<li><a href="https://docs.pytest.org/en/latest/">PyTest</a></li>
+<li><a href="https://mypy.readthedocs.io/en/stable/">MyPy</a></li>
+<li><a href="https://black.readthedocs.io/en/stable/">Black</a></li>
+<li><a href="https://pycqa.github.io/isort/">Isort</a></li>
+<li><a href="http://flake8.pycqa.org/en/stable/">Flake8</a></li>
+<li><a href="https://bandit.readthedocs.io/en/stable/">Bandit</a></li>
+</ol>
+<h3 id="setuppy"><code>setup.py</code></h3>
+<p>Setuptools is used to packaging the library.</p>
+<p><strong><code>setup.py</code> must not import anything from the package</strong> When installing from source, the user may not have the
+packages dependencies installed, and importing the package is likely to raise an <code>ImportError</code>. For this reason, the
+<strong>package version should be obtained without importing</strong>. This is explains why <code>setup.py</code> uses a regular expression to
+grabs the version from <code>__init__.py</code> without actually importing.</p>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li><strong>requirements.txt</strong> - Lists all direct dependencies (packages imported by the library).</li>
+<li><strong>requirements-test.txt</strong> - Lists all direct requirements needed to run the test suite &amp; lints.</li>
+</ul>
+<h2 id="publishing-the-package">Publishing the Package</h2>
+<p>TODO: The project currently only has parts of this process implemented. The CI pipeline does not currently publish the
+wheel and source distribution to <a href="https://pypi.org/project/gbq/">PyPI</a>. For now, this must be done manually.</p>
+<p>Once the package is ready to be released, there are a few things that need to be done:</p>
+<ol>
+<li>Start with a local clone of the repo on the default branch with a clean working tree.</li>
+<li>
+<p>Run the version bump script with the appropriate part name (<code>major</code>, <code>minor</code>, or <code>patch</code>).
+    Example: <code>docker-compose run --rm bump minor</code></p>
+<p>This wil create a new branch, updates all affected files with the new version, and commit the changes to the branch.</p>
+</li>
+<li>
+<p>Push the new branch to create a new pull request.</p>
+</li>
+<li>Get the pull request approved.</li>
+<li>Merge the pull request to the default branch.</li>
+<li>Double check the default branch has all the code that should be included in the release.</li>
+<li>Create a new GitHub release. The tag should be named <code>vX.Y.Z</code> to match the new version number.</li>
+</ol>
+<p>This will trigger the CI system to build a wheel and a source distributions of the package and push them to
+<a href="https://pypi.org/project/gbq/">PyPI</a>.</p>
+<h2 id="continuous-integration-pipeline">Continuous Integration Pipeline</h2>
+<p>TODO: Add CI documentation.</p>
                 
               
               
@@ -353,7 +524,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href=".." class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../api/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -362,19 +533,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Overview
+                Reference
               </div>
             </div>
           </a>
         
         
-          <a href="../api/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../changelog/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Reference
+                Changelog
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
