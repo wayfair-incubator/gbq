@@ -4,8 +4,8 @@
 
 To install `gbq`, simply run this simple command in your terminal of choice:
 
-```shell script
-$ python -m pip install gbq
+```bash
+python -m pip install columbo
 ```
 
 ## Basic Usage Examples
