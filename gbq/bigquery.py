@@ -13,6 +13,7 @@ from gbq.dto import (
     StructureType,
     TimeDefinition,
 )
+from gbq.exceptions import InvalidDefinitionException
 from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
 
 
@@ -67,65 +68,56 @@ class BigQuery:
             [tables.append(table) for table in tables_in_dataset]  # type: ignore
         return tables
 
-    def get_structure(self, project: str, dataset: str, structure: str) -> Table:
+    def get_structure(
+        self, project_id: str, dataset_id: str, structure_id: str
+    ) -> Table:
         """
         Function returns a BigQuery Table object.
 
         Args:
-            project (str):
+            project_id (str):
                 Project bound to the operation.
-            dataset (str):
+            dataset_id (str):
                 ID of dataset containing the table.
-            structure (str):
+            structure_id (str):
                 ID of the structure, can be a table or a view.
 
         Returns:
             Table: An object of BigQuery Table.
         """
-        self.bq_client.project = project
-        full_table_name = f"{project}.{dataset}.{structure}"
-        bq_table: Table = self.bq_client.get_table(full_table_name)
+        self.bq_client.project = project_id
+        structure_name = f"{project_id}.{dataset_id}.{structure_id}"
+        bq_table: Table = self.bq_client.get_table(structure_name)
         return bq_table
 
     def upsert_structure(
         self,
-        project: str,
-        dataset: str,
-        structure_id: str,
-        json_schema: Union[List[Dict], Dict],
+        json_schema: Dict,
+        project_id: str = None,
+        dataset_id: str = None,
+        structure_id: str = None,
     ) -> Table:
         """
         Function upserts provided json schema to the structure.
 
         Args:
-            project (str):
-                Project bound to the operation.
-            dataset (str):
-                ID of dataset containing the structure.
-            structure_id (str):
-                ID of the structure.
             json_schema (Union[List[Dict], Dict]):
                 Raw JSON schema of the table. If List[Dict] it is assumed that the value is
                     table schema, if Dict than value can include partitioning scheme, clustering,
                     table schema, view query, labels, etc
+            project_id (Optional[str]):
+                Project bound to the operation.
+            dataset_id (Optional[str]):
+                ID of dataset containing the structure.
+            structure_id (Optional[str]):
+                ID of the structure.
 
         Examples:
-            List[Dict]:
-            [
-                {
-                    "name": "name1",
-                    "type: "INTEGER",
-                    "mode: "REQUIRED"
-                },
-                {
-                    "name": "name2",
-                    "type: "STRING"
-                }...
-            ]
-
-            Dict:
-            List[Dict]:
+            Table:
             {
+                "project_id": "project",
+                "dataset_id": "dataset",
+                "structure_id": "table",
                 "clustering": ["name"],
                 "partition": {
                     "type": "time",
@@ -148,51 +140,65 @@ class BigQuery:
                 ]
             }
 
+            View:
+            {
+                "project_id": "project",
+                "dataset_id": "dataset",
+                "structure_id": "view",
+                "description": "this is a partitioned table",
+                "labels": {"team: "abc"},
+                "view_query": "SELECT * FROM table"
+            }
+
 
         Returns:
             Table: An object of BigQuery Table.
         """
-        fields_to_update = []
-        self.bq_client.project = project
+        self.bq_client.project = project_id
 
         structure = self._get_structure(json_schema)
 
-        try:
-            bq_structure = self.get_structure(project, dataset, structure_id)
+        project_id = project_id if project_id else structure.project_id
+        dataset_id = dataset_id if dataset_id else structure.dataset_id
+        structure_id = structure_id if structure_id else structure.structure_id
 
-            if structure.type == StructureType.table:
-                fields_to_update.append("schema")
-                schema = get_bq_schema_from_json_schema(structure.table_schema)
-                bq_structure.schema = schema
-            else:
-                fields_to_update.append("view_query")
-                bq_structure.view_query = structure.view_query
+        if project_id and dataset_id and structure_id:
+            try:
+                return self._handle_update_structure(
+                    dataset_id, project_id, structure, structure_id
+                )
+            except NotFound:
+                return self._handle_create_structure(
+                    dataset_id, project_id, structure_id, structure
+                )
+        else:
+            raise InvalidDefinitionException("Missing required structure definition")
 
-            if structure.labels and structure.labels != bq_structure.labels:
-                fields_to_update.append("labels")
-                bq_structure.labels = structure.labels
+    def _handle_update_structure(self, dataset_id, project_id, structure, structure_id):
+        fields_to_update = []
 
-            if (
-                structure.description
-                and structure.description != bq_structure.description
-            ):
-                fields_to_update.append("description")
-                bq_structure.description = structure.description
-
-            if (
-                structure.clustering
-                and structure.clustering != bq_structure.clustering_fields
-            ):
-                fields_to_update.append("clustering")
-                bq_structure.clustering_fields = structure.clustering  # type: ignore
-
-            self.bq_client.update_table(bq_structure, fields_to_update)
-
-            return bq_structure
-        except NotFound:
-            return self._handle_create_structure(
-                dataset, project, structure_id, structure
-            )
+        bq_structure = self.get_structure(project_id, dataset_id, structure_id)
+        if structure.type == StructureType.table:
+            fields_to_update.append("schema")
+            schema = get_bq_schema_from_json_schema(structure.table_schema)
+            bq_structure.schema = schema
+        else:
+            fields_to_update.append("view_query")
+            bq_structure.view_query = structure.view_query
+        if structure.labels and structure.labels != bq_structure.labels:
+            fields_to_update.append("labels")
+            bq_structure.labels = structure.labels
+        if structure.description and structure.description != bq_structure.description:
+            fields_to_update.append("description")
+            bq_structure.description = structure.description
+        if (
+            structure.clustering
+            and structure.clustering != bq_structure.clustering_fields
+        ):
+            fields_to_update.append("clustering")
+            bq_structure.clustering_fields = structure.clustering  # type: ignore
+        self.bq_client.update_table(bq_structure, fields_to_update)
+        return bq_structure
 
     @staticmethod
     def _get_structure(json_schema: Union[Dict, List[Dict]]) -> Structure:

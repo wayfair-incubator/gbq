@@ -45,6 +45,9 @@ class Partition(BaseModel):
 
 class Structure(BaseModel):
     type: StructureType = StructureType.table
+    project_id: Union[str, None] = None
+    dataset_id: Union[str, None] = None
+    structure_id: Union[str, None] = None
     table_schema: List[Dict] = Field([], alias="schema")
     partition: Union[Partition, None] = None
     clustering: Union[List[str], None] = None
