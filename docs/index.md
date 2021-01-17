@@ -1,4 +1,4 @@
-# GBQ
+# GBQ - 0.1.0
 
 [![CI pipeline status](https://github.com/wayfair-incubator/gbq/workflows/CI/badge.svg?branch=main)][ci]
 [![codecov](https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg)][codecov]

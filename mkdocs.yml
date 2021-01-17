@@ -1,6 +1,7 @@
 site_name: gbq Documentation
 repo_url: https://github.com/wayfair-incubator/gbq/
 repo_name: wayfair-incubator/gbq
+edit_uri: edit/main/docs/
 docs_dir: docs
 nav:
   - Overview: index.md
@@ -15,3 +16,12 @@ markdown_extensions:
   - pymdownx.highlight
   - pymdownx.keys
   - pymdownx.superfences
+plugins:
+  - redirects:
+      redirect_maps:
+        index.md: index.md
+extra_css:
+  - css/version-select.css
+  - css/mkdocstrings.css
+extra_javascript:
+  - js/version-select.js
