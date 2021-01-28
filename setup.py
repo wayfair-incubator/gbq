@@ -27,7 +27,7 @@ setuptools.setup(
     ),
     package_data={"gbq": ["py.typed"]},
     python_requires=">=3.6",
-    install_requires=["google-cloud-bigquery==2.6.2", "pydantic==1.7.3"],
+    install_requires=["google-cloud-bigquery", "pydantic"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
@@ -35,5 +35,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 )
