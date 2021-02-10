@@ -13,4 +13,5 @@ pytest==6.2.2
 pytest-cov==2.11.1
 pytest-mock==3.5.1
 pdbpp==0.10.2
+./util/mkdocs-redirects
 ./util/mkdocstrings_patch_type_aliases
