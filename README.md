@@ -58,4 +58,4 @@ Check out the [project documentation](https://wayfair-incubator.github.io/gbq/)
 [bandit-docs]: https://bandit.readthedocs.io/en/stable/
 [sem-ver]: https://semver.org/
 [pypi]: https://semver.org/
-[gbq-docs]: https://github.com/wayfair-incubator/gbq/
+[gbq-docs]: https://wayfair-incubator.github.io/gbq/
