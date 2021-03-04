@@ -52,17 +52,31 @@ class Table:
         self.description = description
 
 
+class Routine:
+    def __init__(
+        self,
+        routine_id: str,
+        type_: str,
+        language: str,
+        body: str,
+    ):
+        self.routine_id = routine_id
+        self.type_ = type_
+        self.language = language
+        self.body = body
+
+
 @pytest.fixture()
 def nested_json_schema():
     return [
         {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
-        {"name": "username", "mode": "NULLABLE", "type": "STRING"},
+        {"name": "supplier_id", "mode": "NULLABLE", "type": "INTEGER"},
         {
             "fields": [
                 {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
-                {"name": "street", "mode": "NULLABLE", "type": "STRING"},
+                {"name": "warehouse_id", "mode": "NULLABLE", "type": "INTEGER"},
             ],
-            "name": "address",
+            "name": "shipments",
             "mode": "REPEATED",
             "type": "RECORD",
         },
@@ -74,7 +88,6 @@ def nested_json_schema_with_time_partition(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "partition": {"type": "time", "definition": {"type": "DAY"}},
-        "type": "table",
     }
 
 
@@ -83,7 +96,6 @@ def nested_json_schema_with_incorrect_partition(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "partition": {"type": "time", "definition": {"type": "day"}},
-        "type": "table",
     }
 
 
@@ -91,8 +103,7 @@ def nested_json_schema_with_incorrect_partition(nested_json_schema):
 def nested_json_schema_with_clustering(nested_json_schema):
     return {
         "schema": nested_json_schema,
-        "clustering": ["id"],
-        "type": "table",
+        "clustering": ["id", "supplier_id"],
     }
 
 
@@ -100,9 +111,8 @@ def nested_json_schema_with_clustering(nested_json_schema):
 def nested_json_schema_with_partition_and_clustering(nested_json_schema):
     return {
         "schema": nested_json_schema,
-        "clustering": ["id"],
+        "clustering": ["id", "supplier_id"],
         "partition": {"type": "time", "definition": {"type": "DAY"}},
-        "type": "table",
     }
 
 
@@ -111,7 +121,6 @@ def nested_json_schema_with_labels(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "labels": {"test": "test"},
-        "type": "table",
     }
 
 
@@ -120,7 +129,6 @@ def nested_json_schema_with_description(nested_json_schema):
     return {
         "schema": nested_json_schema,
         "description": "This is a table",
-        "type": "table",
     }
 
 
@@ -160,7 +168,8 @@ def views() -> List[Table]:
 def schema_fields() -> List[SchemaField]:
     return [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="username", mode="NULLABLE", field_type="STRING"),
+        SchemaField(name="supplier_id", mode="NULLABLE", field_type="INTEGER"),
+        SchemaField(name="shipment_id", mode="NULLABLE", field_type="INTEGER"),
     ]
 
 
@@ -168,13 +177,13 @@ def schema_fields() -> List[SchemaField]:
 def nested_schema_fields() -> List[SchemaField]:
     nested_fields = [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="username", mode="NULLABLE", field_type="STRING"),
+        SchemaField(name="warehouse_id", mode="NULLABLE", field_type="INTEGER"),
     ]
     return [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
-        SchemaField(name="street", mode="NULLABLE", field_type="STRING"),
+        SchemaField(name="supplier_id", mode="NULLABLE", field_type="INTEGER"),
         SchemaField(
-            name="address", mode="REPEATED", field_type="RECORD", fields=nested_fields
+            name="shipments", mode="REPEATED", field_type="RECORD", fields=nested_fields
         ),
     ]
 
@@ -197,12 +206,7 @@ def sql_schema() -> str:
 
 @pytest.fixture()
 def table_structure(nested_json_schema) -> Structure:
-    return Structure(
-        **{
-            "schema": nested_json_schema,
-            "type": "table",
-        }
-    )
+    return Structure(**{"schema": nested_json_schema})
 
 
 @pytest.fixture()
@@ -214,16 +218,58 @@ def table_structure_with_clustering_partition(
 
 @pytest.fixture()
 def view_structure(sql_schema) -> Structure:
-    return Structure(**{"view_query": sql_schema, "type": "view"})
+    return Structure(**{"view_query": sql_schema})
 
 
 @pytest.fixture()
 def view_structure_with_labels_and_description(sql_schema) -> Structure:
     return Structure(
-        **{
-            "view_query": sql_schema,
-            "labels": {"test": "test"},
-            "description": "test",
-            "type": "view",
-        }
+        **{"view_query": sql_schema, "labels": {"test": "test"}, "description": "test"}
+    )
+
+
+def raw_routine():
+    return {"body": "SELECT * FROM table"}
+
+
+def raw_table():
+    return [
+        {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+        {"name": "supplier_id", "mode": "NULLABLE", "type": "INTEGER"},
+        {
+            "fields": [
+                {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+                {"name": "warehouse_id", "mode": "NULLABLE", "type": "INTEGER"},
+            ],
+            "name": "shipments",
+            "mode": "REPEATED",
+            "type": "RECORD",
+        },
+    ]
+
+
+@pytest.fixture()
+def routine() -> Routine:
+    return Routine(
+        routine_id="project.dataset.structure",
+        type_="PROCEDURE",
+        language="SQL",
+        body="SELECT * FROM table",
+    )
+
+
+@pytest.fixture()
+def routine_structure() -> Structure:
+    return empty_arguments_structure()
+
+
+def empty_arguments_structure() -> Structure:
+    return Structure(
+        body="SELECT * FROM table",
+    )
+
+
+def structure_with_arguments() -> Structure:
+    return Structure(
+        body="SELECT * FROM table", arguments=[{"name": "x", "data_type": "date"}]
     )
