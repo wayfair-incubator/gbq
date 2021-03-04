@@ -20,13 +20,12 @@ from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
 
 class BigQuery:
     """
-        BigQueryUtil represent a BigQuery Util resource.
-    w
-        Args:
-            svc_account (str):
-                Stringified JSON service account value.
-            project (Optional[str]):
-                Project bound to the operation.
+    BigQueryUtil represent a BigQuery Util resource.
+    Args:
+        svc_account (str):
+            Stringified JSON service account value.
+        project (Optional[str]):
+            Project bound to the operation.
     """
 
     def __init__(self, svc_account: str, project: str = None):
