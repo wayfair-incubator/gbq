@@ -52,7 +52,7 @@ def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
     return schema
 
 
-def get_bq_schema_from_json(raw_data: dict) -> List[SchemaField]:
+def get_bq_schema_from_record(raw_data: dict) -> List[SchemaField]:
     """
     Function builds a BQ Table schema from raw data of the table.
     """

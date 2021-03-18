@@ -380,7 +380,7 @@ def test__handle_create_structure_table_with_partition_and_clustering(
 
     expected_time_partition = bigquery.TimePartitioning(type_="DAY")
 
-    assert bq_structure.clustering_fields == ["id", "supplier_id"]
+    assert bq_structure.clustering_fields == ["id"]
     assert bq_structure.time_partitioning == expected_time_partition
     assert not bq_structure.range_partitioning
 
