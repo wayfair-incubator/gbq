@@ -74,6 +74,7 @@ def _check_if_map(value: dict):
     return True
 
 
+# flake8: noqa: C901
 def _flatten_data(data: dict):
     """
     Function flattens the data.
@@ -93,7 +94,7 @@ def _flatten_data(data: dict):
     return flat_data
 
 
-def _handle_list(data: Dict, flat_data: Dict, key: str):
+def _handle_list(data, flat_data, key):
     if data[key]:
         list_data = []
         for list_item in data[key]:
@@ -106,7 +107,7 @@ def _handle_list(data: Dict, flat_data: Dict, key: str):
         flat_data[key] = data[key]
 
 
-def _handle_dictionary(data: Dict, flat_data: Dict, key: str):
+def _handle_dictionary(data, flat_data, key):
     if not _check_if_map(data[key]):
         flat_data[key] = data[key]
     else:
@@ -145,12 +146,13 @@ def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> List[SchemaField]:
     return schema
 
 
-def _handle_exception(key: str, schema_field: SchemaField, value: List[Dict]):
-    if isinstance(value, list) and not value:
-        # Managing empty list case
-        schema_field = SchemaField(key, "RECORD", mode="REPEATED")  # REPEATED
-    else:
+def _handle_exception(key, schema_field, value):
+    # We are expecting a REPEATED field
+    if value and len(value) > 0:
         schema_field = SchemaField(
             key, field_type[type(value[0])], mode="REPEATED"
         )  # REPEATED
+    elif isinstance(value, list) and not value:
+        # Managing empty list case
+        schema_field = SchemaField(key, "RECORD", mode="REPEATED")  # REPEATED
     return schema_field

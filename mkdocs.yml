@@ -30,7 +30,4 @@ plugins:
   - mkdocstrings_patch_type_aliases
 
 extra_css:
-  - css/version-select.css
   - css/mkdocstrings.css
-extra_javascript:
-  - js/version-select.js

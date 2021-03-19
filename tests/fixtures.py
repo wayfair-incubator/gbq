@@ -52,6 +52,20 @@ class Table:
         self.description = description
 
 
+class Routine:
+    def __init__(
+        self,
+        routine_id: str,
+        type_: str,
+        language: str,
+        body: str,
+    ):
+        self.routine_id = routine_id
+        self.type_ = type_
+        self.language = language
+        self.body = body
+
+
 @pytest.fixture()
 def nested_json_schema():
     return [
@@ -226,4 +240,51 @@ def view_structure_with_labels_and_description(sql_schema) -> Structure:
             "description": "test",
             "type": "view",
         }
+    )
+
+
+def raw_routine():
+    return {"body": "SELECT * FROM table"}
+
+
+def raw_table():
+    return [
+        {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+        {"name": "street", "mode": "NULLABLE", "type": "STRING"},
+        {
+            "fields": [
+                {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
+                {"name": "street", "mode": "NULLABLE", "type": "STRING"},
+            ],
+            "name": "address",
+            "mode": "REPEATED",
+            "type": "RECORD",
+        },
+    ]
+
+
+@pytest.fixture()
+def routine() -> Routine:
+    return Routine(
+        routine_id="project.dataset.structure",
+        type_="PROCEDURE",
+        language="SQL",
+        body="SELECT * FROM table",
+    )
+
+
+@pytest.fixture()
+def routine_structure() -> Structure:
+    return empty_arguments_structure()
+
+
+def empty_arguments_structure() -> Structure:
+    return Structure(
+        body="SELECT * FROM table",
+    )
+
+
+def structure_with_arguments() -> Structure:
+    return Structure(
+        body="SELECT * FROM table", arguments=[{"name": "x", "data_type": "date"}]
     )

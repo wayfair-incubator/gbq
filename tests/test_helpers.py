@@ -119,20 +119,20 @@ def test_get_bq_schema_from_raw_data_dictionary_list_of_int():
 
 def test_get_bq_schema_from_raw_data_dictionary_list_of_dicts():
 
-    monthly_forecast_fields = [
+    nested_fields = [
         SchemaField("id", "INTEGER", "NULLABLE"),
         SchemaField("value", "FLOAT", "NULLABLE"),
         SchemaField("comment", "STRING", "NULLABLE"),
     ]
     some_data_schema = SchemaField("some_data", "RECORD", "REPEATED")
-    some_data_schema._fields = monthly_forecast_fields
+    some_data_schema._fields = nested_fields
 
     expected = [
         SchemaField("request_id", "INTEGER", "NULLABLE"),
         some_data_schema,
     ]
 
-    raw_input_data = {
+    raw_data = {
         "request_id": 2,
         "some_data": [
             {"id": 1, "value": 6.1167402267456055, "comment": "test"},
@@ -140,7 +140,7 @@ def test_get_bq_schema_from_raw_data_dictionary_list_of_dicts():
         ],
     }
 
-    response = get_bq_schema_from_record(raw_input_data)
+    response = get_bq_schema_from_record(raw_data)
     assert response == expected
 
 
@@ -150,12 +150,12 @@ def test_get_bq_schema_from_raw_data_dictionary_empty_list():
         SchemaField("numbers", "RECORD", "REPEATED"),
     ]
 
-    raw_input_data = {
+    raw_data = {
         "request_id": 2,
         "numbers": [],
     }
 
-    response = get_bq_schema_from_record(raw_input_data)
+    response = get_bq_schema_from_record(raw_data)
     assert response == expected
 
 
@@ -182,13 +182,13 @@ def test_get_bq_schema_from_raw_data_dictionary_maps(
         some_ids_schema,
     ]
 
-    raw_input_data = {
+    raw_data = {
         "request_id": 2,
         "repeated_record": {"5": 5, "10": 10, "11": 11},
         "some_ids": {"5": "5", "10": "10", "11": "11"},
     }
 
-    response = get_bq_schema_from_record(raw_input_data)
+    response = get_bq_schema_from_record(raw_data)
     assert response == expected
 
 
@@ -206,7 +206,7 @@ def test_get_bq_schema_from_raw_data_dictionary_dict():
         some_data_schema,
     ]
 
-    raw_input_data = {
+    raw_data = {
         "request_id": 2,
         "some_data": {
             "id": 1,
@@ -215,5 +215,5 @@ def test_get_bq_schema_from_raw_data_dictionary_dict():
         },
     }
 
-    response = get_bq_schema_from_record(raw_input_data)
+    response = get_bq_schema_from_record(raw_data)
     assert response == expected
