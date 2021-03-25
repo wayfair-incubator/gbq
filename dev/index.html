@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gbq-010" class="md-skip">
+        <a href="#gbq-011" class="md-skip">
           Skip to content
         </a>
       
@@ -204,19 +204,6 @@
     Example
   </a>
   
-    <nav class="md-nav" aria-label="Example">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#command-line-answers" class="md-nav__link">
-    Command Line Answers
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -258,21 +245,6 @@
     <li class="md-nav__item">
       <a href="getting-started/" class="md-nav__link">
         Getting Started
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="api/" class="md-nav__link">
-        Reference
       </a>
     </li>
   
@@ -337,19 +309,6 @@
     Example
   </a>
   
-    <nav class="md-nav" aria-label="Example">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#command-line-answers" class="md-nav__link">
-    Command Line Answers
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -390,20 +349,38 @@
                   </a>
                 
                 
-                <h1 id="gbq-010">GBQ - 0.1.0</h1>
+                <h1 id="gbq-011">GBQ - 0.1.1</h1>
 <p><a href="https://github.com/wayfair-incubator/gbq/actions"><img alt="CI pipeline status" src="https://github.com/wayfair-incubator/gbq/workflows/CI/badge.svg?branch=main" /></a>
 <a href="https://codecov.io/gh/wayfair-incubator/gbq"><img alt="codecov" src="https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg" /></a>
 TODO: PyPi Release Badge</p>
 <h2 id="example">Example</h2>
-<p>TODO</p>
-<h3 id="command-line-answers">Command Line Answers</h3>
-<p>TODO</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">gbq</span> <span class="kn">import</span> <span class="n">BigQuery</span>
+
+<span class="c1"># BigQuery project id as listed in the Google Developers Console.</span>
+<span class="n">project_id</span> <span class="o">=</span> <span class="s1">&#39;project_id&#39;</span>
+
+<span class="c1"># BigQuery dataset id as listed in the Google Developers Console.</span>
+<span class="n">dataset_id</span> <span class="o">=</span> <span class="s1">&#39;dataset_id&#39;</span>
+
+<span class="c1"># BigQuery table/view id as listed in the Google Developers Console.</span>
+<span class="n">structure_id</span> <span class="o">=</span> <span class="s1">&#39;structure_id&#39;</span>
+
+<span class="c1"># BigQuery structure definition as defined in the Google Developers Console.</span>
+<span class="n">json_schema</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">}]}</span>
+
+<span class="c1"># Service account email address as listed in the Google Developers Console.</span>
+<span class="n">svc_account</span> <span class="o">=</span> <span class="s1">&#39;{&quot;type&quot;: &quot;service_account&quot;,   &quot;project_id&quot;: &quot;project_id&quot;}&#39;</span>
+
+<span class="n">bq</span> <span class="o">=</span> <span class="n">BigQuery</span><span class="p">(</span><span class="n">svc_account</span><span class="o">=</span><span class="n">svc_account</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+
+<span class="n">bq</span><span class="o">.</span><span class="n">create_or_update_structure</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">structure_id</span><span class="p">,</span> <span class="n">json_schema</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="where-to-start">Where to Start?</h2>
 <p>To learn the basics of how to start using <code>gbq</code>, read the <a href="getting-started/">Getting Started</a> page.</p>
 <h2 id="detailed-documentation">Detailed Documentation</h2>
 <p>To learn more about the various ways <code>gbq</code> can be used, read the Usage Guide page.</p>
 <h2 id="api-reference">API Reference</h2>
-<p>To find detailed information about a specific function or class, read the <a href="api/">API Reference</a>.</p>
+<p>To find detailed information about a specific function or class, read the <a href="api.md">API Reference</a>.</p>
                 
               
               
