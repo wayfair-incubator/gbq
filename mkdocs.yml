@@ -6,7 +6,6 @@ docs_dir: docs
 nav:
   - Overview: index.md
   - Getting Started: getting-started.md
-  - Reference: api.md
   - Development Guide: development-guide.md
   - Changelog: changelog.md
 theme: material
