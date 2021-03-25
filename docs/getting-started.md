@@ -8,8 +8,14 @@ To install `gbq`, simply run this simple command in your terminal of choice:
 python -m pip install gbq
 ```
 
-## Basic Usage Examples
+## Introduction
+
+`gbq` was developed internally at Wayfair to be used a CD pipeline to create/update tables on Google BigQuery.
+
+At Wayfair `gbq` is used in a with a BigQuery plugin which reads `json` schema files and updates the schemas on Google BigQuery.
+
+## What's Next?
 
 TODO
 
-Read the Usage Guide for a more detailed descriptions of the ways `gbq` can be used.
+[docs-main]: index.md
