@@ -10,8 +10,11 @@ nav:
   - Changelog: changelog.md
 theme: material
 markdown_extensions:
+  - markdown_include.include:
+      base_path: docs
   - admonition
   - codehilite
+  - footnotes
   - pymdownx.highlight
   - pymdownx.keys
   - pymdownx.superfences
@@ -28,8 +31,8 @@ plugins:
             show_root_full_path: False
   - mkdocstrings_patch_type_aliases
 
+extra:
+  version:
+    provider: mike
 extra_css:
-  - css/version-select.css
   - css/mkdocstrings.css
-extra_javascript:
-  - js/version-select.js
