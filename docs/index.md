@@ -44,4 +44,3 @@ To find detailed information about a specific function or class, read the [API R
 [ci]: https://github.com/wayfair-incubator/gbq/actions
 [codecov]: https://codecov.io/gh/wayfair-incubator/gbq
 [getting_started]: getting-started.md
-[api_reference]: api.md
