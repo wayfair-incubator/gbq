@@ -83,7 +83,7 @@ grabs the version from `__init__.py` without actually importing.
 
 ### Requirements
 
-* **requirements.txt** - Lists all direct dependencies (packages imported by the library).
+* **requirements.lock** - Lists all direct dependencies (packages imported by the library).
 * **requirements-test.txt** - Lists all direct requirements needed to run the test suite & lints.
 
 ## Publishing the Package

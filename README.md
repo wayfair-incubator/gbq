@@ -16,7 +16,7 @@ This package provides an interface by wrapping Google's low level library. It ex
 ### Basic Usage
 
 ```python
-from gbq import BigQueryUtil
+from gbq import BigQuery
 
 # BigQuery project id as listed in the Google Developers Console.
 project_id = 'project_id'
@@ -33,9 +33,9 @@ json_schema = {"type": "table", "schema": [{"id": "integer"}]}
 # Service account email address as listed in the Google Developers Console.
 svc_account = '{"type": "service_account",   "project_id": "project_id"}'
 
-bq = BigQueryUtil(svc_account=svc_account, project=project_id)
+bq = BigQuery(svc_account=svc_account, project=project_id)
 
-bq.upsert_structure(project_id, dataset_id, structure_id, json_schema)
+bq.create_or_update_structure(project_id, dataset_id, structure_id, json_schema)
 ```
 
 ## Documentation

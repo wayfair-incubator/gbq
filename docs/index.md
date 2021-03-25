@@ -1,4 +1,4 @@
-# GBQ - 0.1.0
+# GBQ - 0.1.1
 
 [![CI pipeline status](https://github.com/wayfair-incubator/gbq/workflows/CI/badge.svg?branch=main)][ci]
 [![codecov](https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg)][codecov]
@@ -6,11 +6,28 @@ TODO: PyPi Release Badge
 
 ## Example
 
-TODO
+```python
+from gbq import BigQuery
 
-### Command Line Answers
+# BigQuery project id as listed in the Google Developers Console.
+project_id = 'project_id'
 
-TODO
+# BigQuery dataset id as listed in the Google Developers Console.
+dataset_id = 'dataset_id'
+
+# BigQuery table/view id as listed in the Google Developers Console.
+structure_id = 'structure_id'
+
+# BigQuery structure definition as defined in the Google Developers Console.
+json_schema = {"type": "table", "schema": [{"id": "integer"}]}
+
+# Service account email address as listed in the Google Developers Console.
+svc_account = '{"type": "service_account",   "project_id": "project_id"}'
+
+bq = BigQuery(svc_account=svc_account, project=project_id)
+
+bq.create_or_update_structure(project_id, dataset_id, structure_id, json_schema)
+```
 
 ## Where to Start?
 
