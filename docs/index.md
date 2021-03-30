@@ -1,8 +1,9 @@
 # GBQ - 0.1.3
 
 [![CI pipeline status](https://github.com/wayfair-incubator/gbq/workflows/CI/badge.svg?branch=main)][ci]
+[![PyPI](https://img.shields.io/pypi/v/gbq)](https://pypi.org/project/gbq/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/gbq)](https://pypi.org/project/gbq/)
 [![codecov](https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg)][codecov]
-TODO: PyPi Release Badge
 
 ## Example
 
