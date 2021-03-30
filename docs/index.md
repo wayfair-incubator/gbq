@@ -4,8 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/gbq)][pypi]
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/gbq)][pypi]
 [![codecov](https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg)][codecov]
-[![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)][mypy-home]
-[![Code style: black](https://img.shields.io/badge/code%20style-black-black.svg)][black-home]
+
 
 ## Example
 
