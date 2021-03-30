@@ -5,7 +5,6 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/gbq)][pypi]
 [![codecov](https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg)][codecov]
 
-
 ## Example
 
 ```python
