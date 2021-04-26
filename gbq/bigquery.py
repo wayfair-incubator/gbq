@@ -47,6 +47,29 @@ class BigQuery:
         datasets: List[DatasetListItem] = list(self.bq_client.list_datasets())
         return datasets
 
+    def delete_dataset(self, project: str, dataset: str):
+        """
+        Function deletes a dataset.
+
+        Args:
+            project (str):
+                Project bound to the operation.
+            dataset (str):
+                ID of dataset containing the table.
+
+        Returns:
+            Bool: Whether dataset was deleted or not.
+        """
+        self.bq_client.project = project
+
+        try:
+            bq_structure = self.bq_client.get_dataset(dataset)
+            self.bq_client.delete_dataset(bq_structure, delete_contents=True)
+        except NotFound:
+            return False
+
+        return True
+
     def get_table_in_project(self, project: str) -> List[Table]:
         """
         Function returns list of Table objects of all the tables and views in a project.
@@ -87,6 +110,31 @@ class BigQuery:
         full_table_name = f"{project}.{dataset}.{structure}"
         bq_table: Table = self.bq_client.get_table(full_table_name)
         return bq_table
+
+    def delete_table_or_view(self, project: str, dataset: str, structure: str):
+        """
+        Function deletes table or view.
+
+        Args:
+            project (str):
+                Project bound to the operation.
+            dataset (str):
+                ID of dataset containing the table.
+            structure (str):
+                ID of the structure.
+
+        Returns:
+            Bool: Whether table or view was deleted or not.
+        """
+        self.bq_client.project = project
+
+        try:
+            bq_structure = self.get_structure(project, dataset, structure)
+            self.bq_client.delete_table(bq_structure)
+        except NotFound:
+            return False
+
+        return True
 
     def get_routine(self, project: str, dataset: str, routine_name: str) -> Routine:
         """
@@ -494,28 +542,3 @@ class BigQuery:
             self.bq_client.create_table(bq_structure)
 
         return bq_structure
-
-    def delete_table_or_view(self, project: str, dataset: str, structure: str):
-        """
-        Function deletes table or view.
-
-        Args:
-            project (str):
-                Project bound to the operation.
-            dataset (str):
-                ID of dataset containing the table.
-            structure (str):
-                ID of the structure.
-
-        Returns:
-            Bool: Whether table or view was deleted or not.
-        """
-        self.bq_client.project = project
-
-        try:
-            bq_structure = self.get_structure(project, dataset, structure)
-            self.bq_client.delete_table(bq_structure)
-        except NotFound:
-            return False
-
-        return True
