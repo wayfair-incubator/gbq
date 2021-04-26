@@ -454,3 +454,15 @@ def test__handle_stored_procedure_update(bq, routine, routine_structure):
     bq.bq_client.get_routine.return_value = routine
     bq._handle_stored_procedure("project", "dataset", "structure", routine_structure)
     bq.bq_client.update_routine.assert_called_once()
+
+
+def test_delete_table_or_view(bq):
+    bq.bq_client.delete_table.return_value = True
+    response = bq.delete_table_or_view("project", "dataset", "table")
+    assert response
+
+
+def test_delete_table_or_view_when_not_exists(bq):
+    bq.bq_client.get_table.side_effect = NotFound("")
+    response = bq.delete_table_or_view("project", "dataset", "table")
+    assert not response

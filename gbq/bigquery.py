@@ -494,3 +494,28 @@ class BigQuery:
             self.bq_client.create_table(bq_structure)
 
         return bq_structure
+
+    def delete_table_or_view(self, project: str, dataset: str, structure: str):
+        """
+        Function deletes table or view.
+
+        Args:
+            project (str):
+                Project bound to the operation.
+            dataset (str):
+                ID of dataset containing the table.
+            structure (str):
+                ID of the structure.
+
+        Returns:
+            Bool: Whether table or view was deleted or not.
+        """
+        self.bq_client.project = project
+
+        try:
+            bq_structure = self.get_structure(project, dataset, structure)
+            self.bq_client.delete_table(bq_structure)
+        except NotFound:
+            return False
+
+        return True
