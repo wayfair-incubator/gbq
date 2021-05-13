@@ -1,7 +1,7 @@
 dataclasses~=0.8; python_version < '3.7'
 typing_extensions; python_version < '3.8'
-click==7.1.2
-pydantic==1.8.1
+click==8.0.0
+pydantic==1.8.2
 
 #bigquery
 google-cloud-bigquery==2.16.0
