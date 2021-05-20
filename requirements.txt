@@ -1,6 +1,6 @@
 dataclasses~=0.8; python_version < '3.7'
 typing_extensions; python_version < '3.8'
-click==8.0.0
+click==8.0.1
 pydantic==1.8.2
 
 #bigquery
