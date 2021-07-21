@@ -295,8 +295,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#setuppy" class="md-nav__link">
-    setup.py
+  <a href="#building-the-library" class="md-nav__link">
+    Building the Library
   </a>
   
 </li>
@@ -314,8 +314,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#publishing-the-package" class="md-nav__link">
-    Publishing the Package
+  <a href="#publishing-a-new-version" class="md-nav__link">
+    Publishing a New Version
   </a>
   
 </li>
@@ -324,6 +324,33 @@
   <a href="#continuous-integration-pipeline" class="md-nav__link">
     Continuous Integration Pipeline
   </a>
+  
+    <nav class="md-nav" aria-label="Continuous Integration Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lints" class="md-nav__link">
+    Lints
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    Tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distribution-verification" class="md-nav__link">
+    Distribution Verification
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -405,8 +432,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#setuppy" class="md-nav__link">
-    setup.py
+  <a href="#building-the-library" class="md-nav__link">
+    Building the Library
   </a>
   
 </li>
@@ -424,8 +451,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#publishing-the-package" class="md-nav__link">
-    Publishing the Package
+  <a href="#publishing-a-new-version" class="md-nav__link">
+    Publishing a New Version
   </a>
   
 </li>
@@ -434,6 +461,33 @@
   <a href="#continuous-integration-pipeline" class="md-nav__link">
     Continuous Integration Pipeline
   </a>
+  
+    <nav class="md-nav" aria-label="Continuous Integration Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lints" class="md-nav__link">
+    Lints
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    Tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distribution-verification" class="md-nav__link">
+    Distribution Verification
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -502,20 +556,16 @@ coverage rather than decreasing it.</p>
 <li><a href="http://flake8.pycqa.org/en/stable/">Flake8</a></li>
 <li><a href="https://bandit.readthedocs.io/en/stable/">Bandit</a></li>
 </ol>
-<h3 id="setuppy"><code>setup.py</code></h3>
-<p>Setuptools is used to packaging the library.</p>
-<p><strong><code>setup.py</code> must not import anything from the package</strong> When installing from source, the user may not have the
-packages dependencies installed, and importing the package is likely to raise an <code>ImportError</code>. For this reason, the
-<strong>package version should be obtained without importing</strong>. This is explains why <code>setup.py</code> uses a regular expression to
-grabs the version from <code>__init__.py</code> without actually importing.</p>
+<h3 id="building-the-library">Building the Library</h3>
+<p><code>gbq</code> is <a href="https://www.python.org/dev/peps/pep-0517">PEP 517</a> compliant. <a href="https://pypa-build.readthedocs.io/">build</a> is used as the frontend tool for building the library.
+Setuptools is used as the build backend. <code>setup.cfg</code> contains the library metadata. A <code>setup.py</code> is also included to
+support an editable install.</p>
 <h3 id="requirements">Requirements</h3>
 <ul>
 <li><strong>requirements.lock</strong> - Lists all direct dependencies (packages imported by the library).</li>
-<li><strong>requirements-test.txt</strong> - Lists all direct requirements needed to run the test suite &amp; lints.</li>
+<li><strong>requirements-test.txt</strong> - Lists all direct dependencies needed for development. This primarily covers dependencies needed to run the test suite &amp; lints.</li>
 </ul>
-<h2 id="publishing-the-package">Publishing the Package</h2>
-<p>TODO: The project currently only has parts of this process implemented. The CI pipeline does not currently publish the
-wheel and source distribution to <a href="https://pypi.org/project/gbq/">PyPI</a>. For now, this must be done manually.</p>
+<h2 id="publishing-a-new-version">Publishing a New Version</h2>
 <p>Once the package is ready to be released, there are a few things that need to be done:</p>
 <ol>
 <li>Start with a local clone of the repo on the default branch with a clean working tree.</li>
@@ -529,13 +579,35 @@ wheel and source distribution to <a href="https://pypi.org/project/gbq/">PyPI</a
 </li>
 <li>Get the pull request approved.</li>
 <li>Merge the pull request to the default branch.</li>
-<li>Double check the default branch has all the code that should be included in the release.</li>
-<li>Create a new GitHub release. The tag should be named <code>vX.Y.Z</code> to match the new version number.</li>
 </ol>
-<p>This will trigger the CI system to build a wheel and a source distributions of the package and push them to
+<p>Merging the pull request will trigger a GitHub Action that will create a new release. The creation of this new
+release will trigger a GitHub Action that will to build a wheel &amp; a source distributions of the package and push them to
 <a href="https://pypi.org/project/gbq/">PyPI</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The action that uploads the files to PyPI will not run until a repository maintainer acknowledges that the job is
+ready to run. This is to keep the PyPI publishing token secure. Otherwise, any job would have access to the token. </p>
+</div>
+<p>In addition to uploading the files to PyPI, the documentation website will be updated to include the new version. If the
+new version is a full release, it will be made the new <code>latest</code> version.</p>
 <h2 id="continuous-integration-pipeline">Continuous Integration Pipeline</h2>
-<p>TODO: Add CI documentation.</p>
+<p>The Continuous Integration (CI) Pipeline runs to confirm that the repository is in a good state. It will run when 
+someone creates a pull request or when they push new commits to the branch for an existing pull request. The pipeline
+runs multiple different jobs that helps verify the state of the code.</p>
+<p>This same pipeline also runs on the default branch when a maintainer merges a pull request.</p>
+<h3 id="lints">Lints</h3>
+<p>The first set of jobs that run as part of the CI pipline are linters that perform static analysis on the code. This
+includes: <a href="https://mypy.readthedocs.io/en/stable/">MyPy</a>, <a href="https://black.readthedocs.io/en/stable/">Black</a>, <a href="https://pycqa.github.io/isort/">Isort</a>, <a href="http://flake8.pycqa.org/en/stable/">Flake8</a>, and <a href="https://bandit.readthedocs.io/en/stable/">Bandit</a>.</p>
+<h3 id="tests">Tests</h3>
+<p>The next set of jobs run the unit tests using <a href="https://docs.pytest.org/en/latest/">PyTest</a>. The pipeline runs the tests cases across each
+supported version of Python to ensure compatibility.</p>
+<p>For each run of the test cases, the job will record the test results and code coverage information. The pipeline uploads
+the code coverage information to <a href="https://about.codecov.io/">CodeCov</a> to ensure that a pull request doesn't significantly reduce the total
+code coverage percentage or introduce a large amount of code that is untested.</p>
+<h3 id="distribution-verification">Distribution Verification</h3>
+<p>The next set of jobs build the wheel distribution, installs in into a virtual environment, and then runs Python to
+import the library version. This works as a smoke test to ensure that the library can be packaged correctly and used.
+The pipeline runs the tests cases across each supported version of Python to ensure compatibility.</p>
                 
               
               
