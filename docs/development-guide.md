@@ -152,3 +152,4 @@ The pipeline runs the tests cases across each supported version of Python to ens
 [pep-517]: https://www.python.org/dev/peps/pep-0517
 [build]: https://pypa-build.readthedocs.io/
 [pypi]: https://pypi.org/project/gbq/
+[codecov]: https://about.codecov.io/
