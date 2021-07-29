@@ -4,4 +4,4 @@ click==8.0.1
 pydantic==1.8.2
 
 #bigquery
-google-cloud-bigquery==2.23.0
+google-cloud-bigquery==2.23.1
