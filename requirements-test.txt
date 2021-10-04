@@ -5,10 +5,10 @@ flake8==3.9.2
 isort==5.9.3
 mike==1.1.2
 markdown-include==0.6.0
-mkdocs-material==7.3.0
+mkdocs-material==7.3.1
 mkdocs-minify-plugin==0.4.1
 mkdocs-redirects==1.0.3
-mkdocstrings==0.16.1
+mkdocstrings==0.16.2
 livereload==2.6.3
 mypy==0.910
 pytest==6.2.5
