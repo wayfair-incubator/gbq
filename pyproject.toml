@@ -28,4 +28,4 @@ requires = ["setuptools >= 40.9.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [bandit]
-exclude: *venv*,*env*,*scratch*
+exclude = ["*venv*", "*env*", "*scratch*"]
