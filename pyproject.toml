@@ -29,3 +29,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--verbose --cov=columbo --cov-report xml:/tmp/coverage.xml --cov-report term-missing"
+python_files = "tests/*.py"
