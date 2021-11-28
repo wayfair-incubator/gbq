@@ -33,3 +33,14 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 addopts = "--verbose --cov=gbq --cov-report xml:/tmp/coverage.xml --cov-report term-missing"
 python_files = "tests/*.py"
+
+[tool.coverage.run]
+branch = true
+data_file = "/tmp/columbo_coverage"
+
+[tool.coverage.report]
+fail_under = 90
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover"
+]
