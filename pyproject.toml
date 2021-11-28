@@ -29,3 +29,14 @@ build-backend = "setuptools.build_meta"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = true
+data_file = "/tmp/columbo_coverage"
+
+[tool.coverage.report]
+fail_under = 90
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover"
+]
