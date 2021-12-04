@@ -85,7 +85,7 @@ jobs:
         - name: Deploy schemas to BigQuery
           uses: jashparekh/mypy-action@90e277a25b14a18d0e467aea20a88bd81e9acaad
           with:
-            path: '.'
+            path: 'gbq tests'
             mypy_version: '0.910'
 
   test:
