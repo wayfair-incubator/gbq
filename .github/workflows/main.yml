@@ -83,7 +83,7 @@ jobs:
         - name: Check out code
           uses: actions/checkout@v2.4.0
         - name: Deploy schemas to BigQuery
-          uses: jashparekh/mypy-action@cdee68441e63bc563c721e6de9192cad25e76c9a
+          uses: jashparekh/mypy-action@a3091454b3a982213c003e9f87a37028e4c06273
           with:
             path: '.'
             mypy_version: '0.910'
