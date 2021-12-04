@@ -82,7 +82,7 @@ jobs:
     steps:
         - name: Check out code
           uses: actions/checkout@v2.4.0
-        - name: Deploy schemas to BigQuery
+        - name: Run mypy
           uses: jashparekh/mypy-action@v1
           with:
             path: 'gbq tests'
