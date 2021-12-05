@@ -83,7 +83,7 @@ jobs:
         - name: Check out code
           uses: actions/checkout@v2.4.0
         - name: Run mypy
-          uses: jashparekh/mypy-action@eed380f97c373e2266063b3795bb64f395bae7cb
+          uses: jashparekh/mypy-action@8832e9156fa099bf8c7c234ce96982d8905b5e0a
           with:
             path: 'gbq tests'
             requirements: 'gbq'
