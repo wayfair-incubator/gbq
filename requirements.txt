@@ -1,7 +1,7 @@
 dataclasses~=0.8; python_version < '3.7'
 typing_extensions; python_version < '3.8'
 click==8.0.3
-pydantic==1.8.2
+pydantic==1.9.0
 
 #bigquery
 google-api-core==2.3.2
