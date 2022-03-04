@@ -4,7 +4,7 @@ click==8.0.4
 pydantic==1.9.0
 
 #bigquery
-google-api-core==2.5.0
+google-api-core==2.6.0
 google-auth==2.6.0
 google-cloud-bigquery==2.34.1
 google-cloud-core==2.2.2
