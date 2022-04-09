@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
     steps:
         - name: Check out code
           uses: actions/checkout@v3
@@ -162,7 +162,7 @@ jobs:
         uses: ./.github/actions/install-dependencies
         with:
           requirements: "true"
-          test-requirements: "true"
+          docs-requirements: "true"
 
       - name: Build Docs
         run: mkdocs build --strict
@@ -190,7 +190,7 @@ jobs:
         uses: ./.github/actions/install-dependencies
         with:
           requirements: "true"
-          test-requirements: "true"
+          docs-requirements: "true"
 
       - name: Push documentaiton changes
         uses: ./.github/actions/publish-docs-with-mike

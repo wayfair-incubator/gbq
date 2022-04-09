@@ -3,16 +3,9 @@ black==22.3.0
 bump2version==1.0.1
 flake8==4.0.1
 isort==5.10.1
-mike==1.1.2
-markdown-include==0.6.0
-mkdocs-material==8.2.8
-mkdocs-minify-plugin==0.5.0
-mkdocs-redirects==1.0.4
-mkdocstrings==0.17.0
 livereload==2.6.3
 mypy==0.942
 pytest==7.0.1
 pytest-cov==3.0.0
 pytest-mock==3.6.1
 pdbpp==0.10.3
-./util/mkdocstrings_patch_type_aliases
