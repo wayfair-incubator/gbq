@@ -1,4 +1,4 @@
-# GBQ - 0.5.0
+# GBQ - 0.5.1
 
 [![CI pipeline status](https://github.com/wayfair-incubator/gbq/workflows/CI/badge.svg?branch=main)][ci]
 [![PyPI](https://img.shields.io/pypi/v/gbq)](https://pypi.org/project/gbq/)
