@@ -1,4 +1,4 @@
-dataclasses~=0.8; python_version < '3.7'
+dataclasses==0.8; python_version < '3.7'
 typing_extensions; python_version < '3.8'
 click==8.0.4
 pydantic==1.9.1
