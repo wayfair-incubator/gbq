@@ -343,17 +343,6 @@ def test__add_partitioning_scheme_range(bq, table_with_schema):
     assert bq_structure.range_partitioning.range_.interval == expected.range_.interval
 
 
-def test_update_view(bq, sql_schema):
-    bq.create_or_update_view("project", "dataset", "structure", sql_schema)
-    bq.bq_client.update_table.assert_called_once()
-
-
-def test_create_view(bq, sql_schema):
-    bq.bq_client.get_table.side_effect = NotFound("")
-    bq.create_or_update_view("project", "dataset", "structure", sql_schema)
-    bq.bq_client.create_table.assert_called_once()
-
-
 def test__handle_create_structure_table_without_partition_and_clustering(
     bq, table_structure
 ):
