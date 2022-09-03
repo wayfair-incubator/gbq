@@ -15,7 +15,7 @@ from gbq.dto import (
     StructureType,
     TimeDefinition,
 )
-from gbq.exceptions import InvalidDefinitionException
+from gbq.exceptions import GbqException, InvalidDefinitionException
 from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
 
 
@@ -527,10 +527,12 @@ class BigQuery:
             QueryJob
                 An object of QueryJob.
         """
+        try:
+            query_job = self.bq_client.query(query)
 
-        query_job = self.bq_client.query(query)
+            # Wait for query job to finish.
+            query_job.result()
 
-        # Wait for query job to finish.
-        query_job.result()
-
-        return query_job
+            return query_job
+        except Exception as e:
+            raise GbqException("Exception caught") from e
