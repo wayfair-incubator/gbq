@@ -36,8 +36,8 @@ def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
 
     for key, value in enumerate(source):
         schema_field = SchemaField(
-            value.get("name"),
-            value.get("type"),
+            str(value.get("name")),
+            str(value.get("type")),
             value.get("mode", "NULLABLE"),
             value.get("description", None),
         )
@@ -138,9 +138,9 @@ def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> List[SchemaField]:
         # If it is a STRUCT / RECORD field we start the recursion
         if schema_field.field_type == "RECORD" and value:
             if isinstance(value, dict):
-                schema_field._fields = _map_raw_dictionary_to_bq_schema(value)
+                schema_field._fields = tuple(_map_raw_dictionary_to_bq_schema(value))
             else:
-                schema_field._fields = _map_raw_dictionary_to_bq_schema(value[0])
+                schema_field._fields = tuple(_map_raw_dictionary_to_bq_schema(value[0]))
 
     # Return the dictionary values
     return schema

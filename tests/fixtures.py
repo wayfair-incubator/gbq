@@ -286,5 +286,5 @@ def empty_arguments_structure() -> Structure:
 
 def structure_with_arguments() -> Structure:
     return Structure(
-        body="SELECT * FROM table", arguments=[{"name": "x", "data_type": "date"}]
+        body="SELECT * FROM table", arguments=[{"name": "x", "data_type": "DATE"}]
     )

@@ -1,7 +1,7 @@
 from typing import Dict, List, Union
 
 from google.api_core.exceptions import NotFound
-from google.cloud import bigquery, bigquery_v2
+from google.cloud import bigquery
 from google.cloud.bigquery.dataset import DatasetListItem
 from google.cloud.bigquery.routine import Routine, RoutineArgument
 from google.cloud.bigquery.table import PartitionRange, Table
@@ -439,8 +439,10 @@ class BigQuery:
             for argument in structure.arguments:
                 arg = RoutineArgument(
                     name=argument.name,
-                    data_type=bigquery_v2.types.StandardSqlDataType(
-                        type_kind=argument.data_type.value
+                    data_type=bigquery.StandardSqlDataType(
+                        type_kind=bigquery.StandardSqlTypeNames[
+                            argument.data_type.value
+                        ]
                     ),
                 )
                 bq_arguments.append(arg)

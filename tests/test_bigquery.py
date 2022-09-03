@@ -1,6 +1,6 @@
 import pytest
 from google.api_core.exceptions import NotFound
-from google.cloud import bigquery, bigquery_v2
+from google.cloud import bigquery
 from google.cloud.bigquery import PartitionRange
 from google.cloud.bigquery.routine import RoutineArgument
 from pydantic import ValidationError
@@ -433,7 +433,9 @@ def test__handle_create_structure_view_with_label_and_description(
             [
                 RoutineArgument(
                     name="x",
-                    data_type=bigquery_v2.types.StandardSqlDataType(type_kind="DATE"),
+                    data_type=bigquery.standard_sql.StandardSqlDataType(
+                        type_kind=bigquery.StandardSqlTypeNames.DATE
+                    ),
                 )
             ],
         ),
