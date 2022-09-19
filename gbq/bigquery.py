@@ -2,6 +2,7 @@ from typing import Dict, List, Union
 
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
+from google.cloud.bigquery import QueryJob
 from google.cloud.bigquery.dataset import DatasetListItem
 from google.cloud.bigquery.routine import Routine, RoutineArgument
 from google.cloud.bigquery.table import PartitionRange, Table
@@ -14,13 +15,14 @@ from gbq.dto import (
     StructureType,
     TimeDefinition,
 )
-from gbq.exceptions import InvalidDefinitionException
+from gbq.exceptions import GbqException, InvalidDefinitionException
 from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
 
 
 class BigQuery:
     """
     BigQueryUtil represent a BigQuery Util resource.
+
     Args:
         svc_account (str):
             Stringified JSON service account value.
@@ -513,34 +515,24 @@ class BigQuery:
         range_partitioning.range_ = PartitionRange(**definition.range.__dict__)
         return range_partitioning
 
-    def create_or_update_view(
-        self, project: str, dataset: str, view_name: str, sql_schema: str
-    ) -> Table:
+    def execute(self, query: str) -> QueryJob:
         """
-        Function creates/updates provided sql schema to the structure.
+        Function return a QueryJob object after executing a SQL statement
 
         Args:
-            project (str):
-                Project bound to the operation.
-            dataset (str):
-                ID of dataset containing the table.
-            view_name (str):
-                ID of the view.
-            sql_schema (str):
-                An object of internal TableSchema class.
+            query (str):
+                BigQuery query string
 
         Returns:
-            Table: An object of BigQuery Table.
+            QueryJob
+                An object of QueryJob.
         """
-        self.bq_client.project = project
-
         try:
-            bq_structure = self.get_structure(project, dataset, view_name)
-            bq_structure.view_query = sql_schema
-            self.bq_client.update_table(bq_structure, ["view_query"])
-        except NotFound:
-            bq_structure = bigquery.Table(f"{project}.{dataset}.{view_name}")
-            bq_structure.view_query = sql_schema
-            self.bq_client.create_table(bq_structure)
+            query_job = self.bq_client.query(query)
 
-        return bq_structure
+            # Wait for query job to finish.
+            query_job.result()
+
+            return query_job
+        except Exception as e:
+            raise GbqException(str(e)) from e

@@ -1,7 +1,7 @@
 import pytest
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
-from google.cloud.bigquery import PartitionRange
+from google.cloud.bigquery import PartitionRange, QueryJob
 from google.cloud.bigquery.routine import RoutineArgument
 from pydantic import ValidationError
 
@@ -13,6 +13,7 @@ from gbq.dto import (
     Structure,
     TimeDefinition,
 )
+from gbq.exceptions import GbqException
 from tests.fixtures import (
     Routine,
     Table,
@@ -343,17 +344,6 @@ def test__add_partitioning_scheme_range(bq, table_with_schema):
     assert bq_structure.range_partitioning.range_.interval == expected.range_.interval
 
 
-def test_update_view(bq, sql_schema):
-    bq.create_or_update_view("project", "dataset", "structure", sql_schema)
-    bq.bq_client.update_table.assert_called_once()
-
-
-def test_create_view(bq, sql_schema):
-    bq.bq_client.get_table.side_effect = NotFound("")
-    bq.create_or_update_view("project", "dataset", "structure", sql_schema)
-    bq.bq_client.create_table.assert_called_once()
-
-
 def test__handle_create_structure_table_without_partition_and_clustering(
     bq, table_structure
 ):
@@ -480,3 +470,20 @@ def test_delete_table_or_view_when_not_exists(bq):
     bq.bq_client.get_table.side_effect = NotFound("")
     response = bq.delete_table_or_view("project", "dataset", "table")
     assert not response
+
+
+def test_execute_raise_exception(bq):
+    bq.bq_client.query.side_effect = TypeError
+
+    with pytest.raises(GbqException):
+        bq.execute("SELECT * FROM some_table")
+
+
+def test_execute_raise_no_exception(bq):
+    query = "SELECT * FROM some_table"
+    bq.bq_client.query.return_value = QueryJob(
+        job_id="test_id", query=query, client=bq.bq_client
+    )
+    response = bq.execute(query=query)
+
+    assert type(response) == QueryJob
