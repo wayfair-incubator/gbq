@@ -535,4 +535,4 @@ class BigQuery:
 
             return query_job
         except Exception as e:
-            raise GbqException("Exception caught") from e
+            raise GbqException(str(e)) from e
