@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
