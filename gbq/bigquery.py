@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
@@ -30,7 +30,7 @@ class BigQuery:
             Project bound to the operation.
     """
 
-    def __init__(self, svc_account: str, project: str = None):
+    def __init__(self, svc_account: str, project: Optional[str] = None):
         self.credentials = get_bq_credentials(svc_account)
         self.bq_client = bigquery.Client(credentials=self.credentials, project=project)
 

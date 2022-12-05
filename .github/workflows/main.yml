@@ -75,7 +75,7 @@ jobs:
           test-requirements: "true"
 
       - name: Run isort
-        run: isort --recursive --check-only gbq tests
+        run: isort --check-only gbq tests
 
   mypy:
     runs-on: ubuntu-latest
