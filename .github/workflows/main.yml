@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+      - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -31,9 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -48,8 +48,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Check out code
-          uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
+          uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Install dependencies
@@ -64,8 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+      - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -81,9 +81,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Check out code
-          uses: actions/checkout@v3
+          uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
         - name: Run mypy
-          uses: jashparekh/mypy-action@v3
+          uses: jashparekh/mypy-action@a4eb0d0a6f3dca7c6f03d7723f0f1cf12091fa19 # v3
           with:
             path: 'gbq tests'
 
@@ -94,8 +94,8 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     steps:
         - name: Check out code
-          uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
+          uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
           with:
             python-version: ${{ matrix.python-version }}
         - name: Install dependencies
@@ -108,7 +108,7 @@ jobs:
           run: pytest --cov-report xml:coverage-${{ matrix.python-version }}.xml --junitxml=test-results-${{ matrix.python-version }}.xml
 
         - name: Upload pytest test results artifact
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3
           with:
             name: pytest-results-${{ matrix.python-version }}
             path: test-results-${{ matrix.python-version }}.xml
@@ -116,7 +116,7 @@ jobs:
           if: ${{ always() }}
 
         - name: Upload coverage results artifact
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3
           with:
             name: pytest-coverage-${{ matrix.python-version }}
             path: coverage-${{ matrix.python-version }}.xml
@@ -124,7 +124,7 @@ jobs:
           if: ${{ always() }}
 
         - name: Publish coverage results to Codecov
-          uses: codecov/codecov-action@v3.1.1
+          uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # v3.1.1
           with:
             file: coverage-${{ matrix.python-version }}.xml
             fail_ci_if_error: true
@@ -136,8 +136,8 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+      - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Build wheel
@@ -152,9 +152,9 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -170,7 +170,7 @@ jobs:
       # upload artifact for dev build
       - name: Upload coverage results artifact
         if: github.ref != 'refs/heads/main'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3
         with:
           name: docs-site
           path: site/
@@ -180,9 +180,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
