@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
       - name: Set up Python
         uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
         with:
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Check out code
-          uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+          uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
         - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Check out code
-          uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+          uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
         - name: Run mypy
           uses: jashparekh/mypy-action@a4eb0d0a6f3dca7c6f03d7723f0f1cf12091fa19 # v3
           with:
@@ -94,7 +94,7 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     steps:
         - name: Check out code
-          uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+          uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
         - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
           with:
             python-version: ${{ matrix.python-version }}
@@ -136,7 +136,7 @@ jobs:
         python-version: [ "3.8", "3.9", "3.10" ]
     steps:
       - name: Check out code
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -152,7 +152,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Check out code
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
 
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
         with:
@@ -180,7 +180,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Check out code
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b # v3
 
       - uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4
         with:
