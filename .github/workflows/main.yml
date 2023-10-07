@@ -19,6 +19,7 @@ jobs:
       - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          architecture: "x64"
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
@@ -36,6 +37,7 @@ jobs:
         uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          architecture: "x64"
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
@@ -52,6 +54,7 @@ jobs:
         - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
+            architecture: "x64"
         - name: Install dependencies
           uses: ./.github/actions/install-dependencies
           with:
@@ -68,6 +71,7 @@ jobs:
       - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          architecture: "x64"
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
@@ -98,6 +102,7 @@ jobs:
         - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
           with:
             python-version: ${{ matrix.python-version }}
+            architecture: "x64"
         - name: Install dependencies
           uses: ./.github/actions/install-dependencies
           with:
@@ -140,6 +145,7 @@ jobs:
       - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
         with:
           python-version: ${{ matrix.python-version }}
+          architecture: "x64"
       - name: Build wheel
         uses: ./.github/actions/build-dist
       - name: Verify wheel
@@ -185,7 +191,7 @@ jobs:
       - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
+          architecture: "x64"
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
