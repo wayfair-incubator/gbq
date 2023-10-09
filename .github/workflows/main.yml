@@ -85,7 +85,7 @@ jobs:
         - name: Run mypy
           uses: jashparekh/mypy-action@a4eb0d0a6f3dca7c6f03d7723f0f1cf12091fa19 # v3
           with:
-            path: 'gbq tests'
+            path: 'gbq'
 
   test:
     runs-on: ubuntu-latest

@@ -40,7 +40,7 @@ pytest tests --cov-report html
 echo "Running autoflake..."
 autoflake -irv --remove-all-unused-import gbq tests
 
-echo "Running iSort..."
+echo "Running isort..."
 isort ${ISORT_ACTION} gbq tests
 
 echo "Running black..."
@@ -49,8 +49,8 @@ black ${BLACK_ACTION} gbq tests
 echo "Running flake8..."
 flake8 gbq tests
 
-echo "Running MyPy..."
-mypy gbq tests
+echo "Running mypy..."
+mypy gbq
 
 echo "Running bandit..."
 bandit --ini .bandit --quiet -r gbq
