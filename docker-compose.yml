@@ -2,8 +2,8 @@ version: '3.4'
 
 x-mount-app-and-user-git-config: &mount-app-and-user-git-config
   volumes:
-    - ./:/app
-    - ~/.gitconfig:/home/gbq/.gitconfig # allow script to commit as user
+    - "./:/app"
+    - "~/.gitconfig:/home/gbq/.gitconfig" # allow script to commit as user
 
 services:
 
@@ -16,10 +16,9 @@ services:
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     volumes:
-      - ./:/app
+      - "./:/app"
 
-  # run all the tests and linting locally
-  # - black & isort will format code to address issues
+  # Run the test & lint suite in a dedicated container
   test:
     <<: *devbox
     command: "docker/run_tests.sh --format-code"
@@ -38,11 +37,9 @@ services:
     command: [ "serve", "--dev-addr=0.0.0.0:8000" ]
 
   mike:
-    <<: *mkdocs
-    <<: *mount-app-and-user-git-config
+    <<: [ *mkdocs, *mount-app-and-user-git-config ]
     entrypoint: "mike"
 
   bump:
-    <<: *devbox
-    <<: *mount-app-and-user-git-config
-    entrypoint: docker/bump_version.sh
+    <<: [ *devbox, *mount-app-and-user-git-config ]
+    entrypoint: "docker/bump_version.sh"
