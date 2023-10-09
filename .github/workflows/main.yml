@@ -85,7 +85,7 @@ jobs:
         - name: Run mypy
           uses: jashparekh/mypy-action@a4eb0d0a6f3dca7c6f03d7723f0f1cf12091fa19 # v3
           with:
-            path: 'gbq'
+            path: "gbq"
 
   test:
     runs-on: ubuntu-latest
@@ -146,6 +146,14 @@ jobs:
         uses: ./.github/actions/verify-wheel
         with:
           package-import-name: "gbq"
+
+  build-devbox-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      - name: Build devbox image
+        run: "docker-compose build devbox"
 
   build-docs:
     runs-on: ubuntu-latest
