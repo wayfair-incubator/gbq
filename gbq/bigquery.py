@@ -315,7 +315,7 @@ class BigQuery:
         if isinstance(json_schema, dict):
             return Structure(**json_schema)
         elif isinstance(json_schema, list):
-            return Structure(**{"schema": json_schema})
+            return Structure(**{"schema": json_schema})  # type: ignore[arg-type]
 
         return  # type: ignore
 
