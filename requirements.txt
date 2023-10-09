@@ -5,7 +5,7 @@ pydantic==1.10.4
 
 #bigquery
 google-api-core==2.11.0
-google-auth==2.15.0
+google-auth==2.23.3
 google-cloud-bigquery==3.4.1
 google-cloud-core==2.3.2
 google-crc32c==1.5.0
