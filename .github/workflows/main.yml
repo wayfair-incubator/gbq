@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
-      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+      - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -33,7 +33,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
       - name: Set up Python
-        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -49,7 +49,7 @@ jobs:
     steps:
         - name: Check out code
           uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
-        - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+        - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
         - name: Install dependencies
@@ -65,7 +65,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
-      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+      - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
@@ -95,7 +95,7 @@ jobs:
     steps:
         - name: Check out code
           uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
-        - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+        - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
           with:
             python-version: ${{ matrix.python-version }}
         - name: Install dependencies
@@ -108,7 +108,7 @@ jobs:
           run: pytest --cov-report xml:coverage-${{ matrix.python-version }}.xml --junitxml=test-results-${{ matrix.python-version }}.xml
 
         - name: Upload pytest test results artifact
-          uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
+          uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
           with:
             name: pytest-results-${{ matrix.python-version }}
             path: test-results-${{ matrix.python-version }}.xml
@@ -116,7 +116,7 @@ jobs:
           if: ${{ always() }}
 
         - name: Upload coverage results artifact
-          uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
+          uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
           with:
             name: pytest-coverage-${{ matrix.python-version }}
             path: coverage-${{ matrix.python-version }}.xml
@@ -137,7 +137,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
-      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+      - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Build wheel
@@ -162,7 +162,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
 
-      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+      - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -178,7 +178,7 @@ jobs:
       # upload artifact for dev build
       - name: Upload coverage results artifact
         if: github.ref != 'refs/heads/main'
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
         with:
           name: docs-site
           path: site/
@@ -190,7 +190,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
 
-      - uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4
+      - uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
