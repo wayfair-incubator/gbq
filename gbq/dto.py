@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, field_validator, model_validator, Field
 
 
 class StructureType(Enum):
@@ -66,7 +66,7 @@ class Argument(BaseModel):
     name: str
     data_type: BigQueryDataType
 
-    @validator("data_type", pre=True)
+    @field_validator("data_type")
     def str_or_list_(cls, v):
         return v.upper()
 
@@ -82,7 +82,7 @@ class Structure(BaseModel):
     type: Union[StructureType, None] = None
     arguments: Union[List[Argument], None] = None
 
-    @root_validator
+    @model_validator(mode="after")
     def validate_type(cls, values):
         if not values.get("type", None):
             if values["view_query"]:
@@ -93,7 +93,7 @@ class Structure(BaseModel):
                 values["type"] = StructureType.table
         return values
 
-    @validator("view_query", "body", pre=True)
+    @field_validator("view_query")
     def str_or_list_(cls, v):
         if isinstance(v, list) and not [s for s in v if not isinstance(s, str)]:
             v = "\n".join(v)

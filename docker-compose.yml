@@ -29,6 +29,10 @@ services:
     entrypoint: "/bin/bash"
     command: "docker/lock_requirements.sh"
 
+  bump:
+    <<: [ *devbox, *mount-app-and-user-git-config ]
+    entrypoint: "docker/bump_version.sh"
+
   # generate and serve the project documentation locally
   mkdocs: &mkdocs
     <<: *devbox
@@ -38,11 +42,5 @@ services:
     command: [ "serve", "--dev-addr=0.0.0.0:8000" ]
 
   mike:
-    <<: *mkdocs
-    <<: *mount-app-and-user-git-config
+    <<: [ *mkdocs, *mount-app-and-user-git-config ]
     entrypoint: "mike"
-
-  bump:
-    <<: *devbox
-    <<: *mount-app-and-user-git-config
-    entrypoint: docker/bump_version.sh
