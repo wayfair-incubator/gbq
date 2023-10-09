@@ -23,6 +23,6 @@ USER ${_USER}
 COPY --chown=${UID}:${GID} ./requirements* /app/
 WORKDIR /app
 
-RUN pip install -r requirements.txt -r requirements-test.txt -r requirements-docs.txt
+RUN pip install -r requirements.lock -r requirements-test.txt -r requirements-docs.txt
 
 CMD bash
