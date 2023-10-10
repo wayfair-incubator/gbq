@@ -124,7 +124,6 @@ def test_get_bq_schema_from_raw_data_dictionary_list_of_int():
 
 
 def test_get_bq_schema_from_raw_data_dictionary_list_of_dicts():
-
     nested_fields = tuple(
         [
             SchemaField("id", "INTEGER", "NULLABLE"),

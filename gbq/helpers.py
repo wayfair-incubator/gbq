@@ -125,7 +125,6 @@ def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> List[SchemaField]:
 
     # Iterate the existing dictionary
     for key, value in raw_data.items():
-
         try:
             # NULLABLE By Default
             schema_field = SchemaField(key, field_type[type(value)])
