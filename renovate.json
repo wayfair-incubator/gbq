@@ -20,7 +20,7 @@
   "packageRules": [
     {
       "postUpgradeTasks": {
-        "commands": ["bash scripts/generate_python_lockfiles.sh"],
+        "commands": ["bash docker/lock_requirements.sh"],
         "fileFilters": ["requirements.lock"],
         "executionMode": "branch"
       },
