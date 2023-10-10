@@ -15,5 +15,16 @@
 
   "pip_requirements": {
     "fileMatch": ["(^|/)([\\w-]*)requirements[-\\w]*\\.(txt|pip)$"]
-  }
+  },
+
+  "packageRules": [
+    {
+      "postUpgradeTasks": {
+        "commands": ["bash scripts/generate_python_lockfiles.sh"],
+        "fileFilters": ["requirements.lock"],
+        "executionMode": "branch"
+      },
+      "matchManagers": ["pip_requirements"]
+    }
+  ]
 }
