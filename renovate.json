@@ -15,16 +15,5 @@
 
   "pip_requirements": {
     "fileMatch": ["(^|/)([\\w-]*)requirements[-\\w]*\\.(txt|pip)$"]
-  },
-
-  "packageRules": [
-    {
-      "postUpgradeTasks": {
-        "commands": ["bash docker/lock_requirements.sh"],
-        "fileFilters": ["requirements.lock"],
-        "executionMode": "branch"
-      },
-      "matchManagers": ["pip_requirements"]
-    }
-  ]
+  }
 }
