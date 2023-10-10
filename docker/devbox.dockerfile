@@ -1,4 +1,4 @@
-FROM python:3.10.6-buster
+FROM python:3.12-bookworm
 
 ARG _USER="lilchz"
 ARG _UID="1001"
