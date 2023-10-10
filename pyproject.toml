@@ -18,7 +18,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-data_file = "/tmp/columbo_coverage"
+data_file = "/tmp/gbq_coverage"
 
 [tool.coverage.report]
 fail_under = 90
