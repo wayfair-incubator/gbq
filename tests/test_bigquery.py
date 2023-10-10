@@ -486,4 +486,4 @@ def test_execute_raise_no_exception(bq):
     )
     response = bq.execute(query=query)
 
-    assert type(response) == QueryJob
+    assert isinstance(response, QueryJob)

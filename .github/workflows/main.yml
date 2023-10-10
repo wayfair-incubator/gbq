@@ -199,7 +199,7 @@ jobs:
           requirements: "true"
           docs-requirements: "true"
 
-      - name: Push documentaiton changes
+      - name: Push documentation changes
         uses: ./.github/actions/publish-docs-with-mike
         with:
           version_name: dev
