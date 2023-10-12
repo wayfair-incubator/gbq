@@ -125,6 +125,7 @@ jobs:
         - name: Publish coverage results to Codecov
           uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
           with:
+            token: 2168e29b-e40e-4ddf-acc3-00907462e93e # not ideal, but limited risk
             file: coverage-${{ matrix.python-version }}.xml
             fail_ci_if_error: true
 
