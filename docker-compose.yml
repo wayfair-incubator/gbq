@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 x-mount-app-and-user-git-config: &mount-app-and-user-git-config
   volumes:
@@ -12,9 +12,7 @@ services:
     build:
       dockerfile: "./docker/devbox.dockerfile"
       context: "."
-    image: "gbq_devbox"
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
+    image: "gbq-devbox"
     volumes:
       - "./:/app"
 
