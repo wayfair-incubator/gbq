@@ -37,7 +37,3 @@ services:
   mike:
     <<: [ *mkdocs, *mount-app-and-user-git-config ]
     entrypoint: "mike"
-
-  bump:
-    <<: [ *devbox, *mount-app-and-user-git-config ]
-    entrypoint: "docker/bump_version.sh"
