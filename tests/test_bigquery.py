@@ -3,14 +3,16 @@ from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 from google.cloud.bigquery import PartitionRange, QueryJob
 from google.cloud.bigquery.routine import RoutineArgument
-from pydantic import ValidationError
 
 from gbq.bigquery import BigQuery
 from gbq.dto import (
+    Argument,
+    BigQueryDataType,
     Partition,
     RangeDefinition,
     RangeFieldDefinition,
     Structure,
+    StructureType,
     TimeDefinition,
 )
 from gbq.exceptions import GbqException
@@ -132,7 +134,7 @@ def test_create_or_update_structure_with_incorrect_partition(
     bq, nested_json_schema_with_incorrect_partition, table
 ):
     bq.bq_client.get_table.side_effect = NotFound("")
-    with pytest.raises(ValidationError):
+    with pytest.raises(KeyError):
         bq.create_or_update_structure(
             "project",
             "dataset",
@@ -487,3 +489,22 @@ def test_execute_raise_no_exception(bq):
     response = bq.execute(query=query)
 
     assert isinstance(response, QueryJob)
+
+
+def test_argument_class_data_type():
+    input_json = {"name": "test", "data_type": "string"}
+    expected = Argument(**input_json)
+    assert expected.name == "test"
+    assert expected.data_type == BigQueryDataType.STRING
+
+
+def test_structure_validate_type():
+    input_json = {"view_query": "test"}
+    expected = Structure(**input_json)
+    assert expected.type == StructureType.view
+
+
+def test_structure_str_or_list_body():
+    input_json = {"body": ["test", "test1", "test2"]}
+    expected = Structure(**input_json)
+    assert expected.body == "test\ntest1\ntest2"
