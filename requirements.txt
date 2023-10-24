@@ -1,6 +1,6 @@
 dataclasses==0.6
 click==8.1.7
-pydantic<2.0
+pydantic==2.4.2
 
 #bigquery
 google-api-core==2.12.0

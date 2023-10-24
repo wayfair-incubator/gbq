@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class StructureType(Enum):
@@ -42,8 +42,14 @@ class BigQueryDataType(Enum):
 
 class TimeDefinition(BaseModel):
     type: TimeType
-    expirationMs: Optional[str]
-    field: Optional[str]
+    expirationMs: Optional[str] = None
+    field: Optional[str] = None
+
+    @model_validator(mode="after")
+    def str_or_list_(self) -> "TimeDefinition":
+        if isinstance(self.type, str):
+            self.type = TimeType[self.type.upper()]
+        return self
 
 
 class RangeFieldDefinition(BaseModel):
@@ -66,9 +72,11 @@ class Argument(BaseModel):
     name: str
     data_type: BigQueryDataType
 
-    @validator("data_type", pre=True)
-    def str_or_list_(cls, v):
-        return v.upper()
+    @model_validator(mode="after")
+    def str_or_list_(self) -> "Argument":
+        if isinstance(self.data_type, str):
+            self.data_type = BigQueryDataType[self.data_type.upper()]
+        return self
 
 
 class Structure(BaseModel):
@@ -82,19 +90,21 @@ class Structure(BaseModel):
     type: Union[StructureType, None] = None
     arguments: Union[List[Argument], None] = None
 
-    @root_validator
-    def validate_type(cls, values):
-        if not values.get("type", None):
-            if values["view_query"]:
-                values["type"] = StructureType.view
-            elif values["body"]:
-                values["type"] = StructureType.stored_procedure
+    @model_validator(mode="after")
+    def validate_type(self) -> "Structure":
+        if self.type is None:
+            if self.view_query:
+                self.type = StructureType.view
+            elif self.body:
+                self.type = StructureType.stored_procedure
             else:
-                values["type"] = StructureType.table
-        return values
+                self.type = StructureType.table
+        return self
 
-    @validator("view_query", "body", pre=True)
-    def str_or_list_(cls, v):
-        if isinstance(v, list) and not [s for s in v if not isinstance(s, str)]:
-            v = "\n".join(v)
-        return v
+    @model_validator(mode="after")
+    def str_or_list_(self) -> "Structure":
+        if isinstance(self.body, list) and not [
+            s for s in self.body if not isinstance(s, str)
+        ]:
+            self.body = "\n".join(self.body)
+        return self
