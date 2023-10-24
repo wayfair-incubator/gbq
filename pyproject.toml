@@ -1,17 +1,49 @@
-[tool.black]
-line-length = 88
-target-version = ["py38", "py39", "py310", "py311"]
-
-[tool.isort]
-profile = "black"
-
 [build-system]
-requires = ["setuptools >= 40.9.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling==1.18.0"]
+build-backend = "hatchling.build"
 
+[project]
+name = "gbq"
+version = "1.0.4"
+description = "Python wrapper for interacting Google BigQuery."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    { name = "Jash Parekh", email = "jparekh1@wayfair.com" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "google-cloud-bigquery",
+    "pydantic>=2.4.0,<3"
+]
+
+[project.urls]
+Homepage = "https://github.com/wayfair-incubator/gbq"
+changelog = "https://github.com/wayfair-incubator/gbq/blob/main/CHANGELOG.md"
+issues = "https://github.com/wayfair-incubator/gbq/issues"
+documentation = "https://wayfair-incubator.github.io/gbq"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/gbq",
+]
+
+# type checking
 [tool.mypy]
 ignore_missing_imports = true
 
+# testing
 [tool.pytest.ini_options]
 addopts = "--verbose --cov=gbq --cov-report xml:/tmp/coverage.xml --cov-report term-missing"
 testpaths = ["tests"]
@@ -27,15 +59,23 @@ exclude_lines = [
     "pragma: no cover"
 ]
 
+# code formatting
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+
 # version bumping
 [tool.hyper-bump-it.git.actions]
 commit = "create-and-push"
 branch = "create-and-push"
 
 [[tool.hyper-bump-it.files]]
-file_glob = "setup.cfg"
+file_glob = "pyproject.toml"
 keystone = true
-search_format_pattern = "version = {version}"
+search_format_pattern = "version = \"{version}\""
 
 [[tool.hyper-bump-it.files]]
 file_glob = "gbq/__init__.py"
