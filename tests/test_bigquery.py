@@ -12,6 +12,7 @@ from gbq.dto import (
     RangeDefinition,
     RangeFieldDefinition,
     Structure,
+    StructureType,
     TimeDefinition,
 )
 from gbq.exceptions import GbqException
@@ -296,16 +297,9 @@ def test__get_table_schema(bq, nested_json_schema):
     assert bq._get_structure(nested_json_schema) == expected
 
 
-def test__get_table_schema_with_partition():
-    input_json = {"name": "test", "data_type": "string"}
-    expected = Argument(**input_json)
-    assert expected.name == "test"
-    assert expected.data_type == BigQueryDataType.STRING
-
-
-def test_argument_class_data_type(bq, nested_json_schema):
-    expected = Structure(**{"schema": nested_json_schema})
-    assert bq._get_structure(nested_json_schema) == expected
+def test__get_table_schema_with_partition(bq, nested_json_schema_with_time_partition):
+    expected = Structure(**nested_json_schema_with_time_partition)
+    assert bq._get_structure(nested_json_schema_with_time_partition) == expected
 
 
 def test__add_partitioning_scheme_time(bq, table_with_schema):
@@ -495,3 +489,22 @@ def test_execute_raise_no_exception(bq):
     response = bq.execute(query=query)
 
     assert isinstance(response, QueryJob)
+
+
+def test_argument_class_data_type():
+    input_json = {"name": "test", "data_type": "string"}
+    expected = Argument(**input_json)
+    assert expected.name == "test"
+    assert expected.data_type == BigQueryDataType.STRING
+
+
+def test_structure_validate_type():
+    input_json = {"view_query": "test"}
+    expected = Structure(**input_json)
+    assert expected.type == StructureType.view
+
+
+def test_structure_str_or_list_body():
+    input_json = {"body": ["test", "test1", "test2"]}
+    expected = Structure(**input_json)
+    assert expected.body == "test\ntest1\ntest2"

@@ -102,7 +102,7 @@ class Structure(BaseModel):
         return self
 
     @model_validator(mode="before")  # type: ignore[arg-type]
-    def str_or_list_(self):
+    def str_or_list_body(self):
         if isinstance(self.get("body"), list) and not [
             s for s in self.get("body") if not isinstance(s, str)
         ]:
