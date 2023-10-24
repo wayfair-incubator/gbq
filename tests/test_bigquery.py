@@ -11,7 +11,7 @@ from gbq.dto import (
     RangeDefinition,
     RangeFieldDefinition,
     Structure,
-    TimeDefinition,
+    TimeDefinition, Argument, BigQueryDataType,
 )
 from gbq.exceptions import GbqException
 from tests.fixtures import (
@@ -295,9 +295,19 @@ def test__get_table_schema(bq, nested_json_schema):
     assert bq._get_structure(nested_json_schema) == expected
 
 
-def test__get_table_schema_with_partition(bq, nested_json_schema_with_time_partition):
-    expected = Structure(**nested_json_schema_with_time_partition)
-    assert bq._get_structure(nested_json_schema_with_time_partition) == expected
+def test__get_table_schema_with_partition():
+    input_json = {
+        "name": "test",
+        "data_type": "string"
+    }
+    expected = Argument(**input_json)
+    assert expected.name == "test"
+    assert expected.data_type == BigQueryDataType.STRING
+
+
+def test_argument_class_data_type(bq, nested_json_schema):
+    expected = Structure(**{"schema": nested_json_schema})
+    assert bq._get_structure(nested_json_schema) == expected
 
 
 def test__add_partitioning_scheme_time(bq, table_with_schema):
