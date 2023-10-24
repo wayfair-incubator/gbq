@@ -96,7 +96,7 @@ def nested_json_schema_with_time_partition(nested_json_schema):
 def nested_json_schema_with_incorrect_partition(nested_json_schema):
     return {
         "schema": nested_json_schema,
-        "partition": {"type": "time", "definition": {"type": "day"}},
+        "partition": {"type": "time", "definition": {"type": "adasd"}},
         "type": "table",
     }
 
