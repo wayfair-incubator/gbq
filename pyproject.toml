@@ -48,4 +48,5 @@ search_format_pattern = "GBQ - {version}"
 file_glob = "CHANGELOG.md"
 search_format_pattern = "## [Unreleased]"
 replace_format_pattern = """## [Unreleased]
+
 ## [{version}] - {today}"""
