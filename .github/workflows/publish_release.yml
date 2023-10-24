@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4
+      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -30,23 +30,36 @@ jobs:
         with:
           new_version: true
 
-  build-and-publish-wheel-to-pypi:
+  build-distributions:
     runs-on: ubuntu-latest
-    environment: "Publish Release"
     steps:
       - name: Check out code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4
+      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Build wheel
         uses: ./.github/actions/build-dist
 
-        # v1.4.2 release. Using full SHA for security
-        # https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@79739dc2f2bf6bcfd21ecf9af9f06bd643dbeeae
+      - name: Upload distribution artifacts
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          name: distributions
+          path: ./dist
+
+  publish-to-pypi:
+    runs-on: ubuntu-latest
+    environment: "Publish Release"
+    permissions:
+      id-token: write
+    needs: ["build-distributions"]
+    steps:
+      - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+            name: distributions
+            path: ./dist
+
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e # v1.8.10
