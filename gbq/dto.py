@@ -45,7 +45,7 @@ class TimeDefinition(BaseModel):
     expirationMs: Optional[str] = None
     field: Optional[str] = None
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # type: ignore[arg-type]
     def str_or_list_(self):
         if isinstance(self.get("type"), str):
             self["type"] = TimeType[self.get("type", "").upper()]
@@ -72,7 +72,7 @@ class Argument(BaseModel):
     name: str
     data_type: BigQueryDataType
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # type: ignore[arg-type]
     def str_or_list_(self):
         if isinstance(self.get("data_type"), str):
             self["data_type"] = BigQueryDataType[self.get("data_type", "").upper()]
@@ -90,7 +90,7 @@ class Structure(BaseModel):
     type: Union[StructureType, None] = None
     arguments: Union[List[Argument], None] = None
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # type: ignore[arg-type]
     def validate_type(self):
         if not self.get("type", None):
             if self.get("view_query"):
@@ -101,8 +101,10 @@ class Structure(BaseModel):
                 self["type"] = StructureType.table
         return self
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # type: ignore[arg-type]
     def str_or_list_(self):
-        if isinstance(self["body"], list) and not [s for s in self["body"] if not isinstance(s, str)]:
+        if isinstance(self.get("body"), list) and not [
+            s for s in self.get("body") if not isinstance(s, str)
+        ]:
             self["body"] = "\n".join(self["body"])
         return self
