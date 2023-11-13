@@ -2,22 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://wayfair-incubator.github.io/gbq/dev/</loc>
-         <lastmod>2023-11-10</lastmod>
+         <lastmod>2023-11-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://wayfair-incubator.github.io/gbq/dev/changelog/</loc>
-         <lastmod>2023-11-10</lastmod>
+         <lastmod>2023-11-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://wayfair-incubator.github.io/gbq/dev/development-guide/</loc>
-         <lastmod>2023-11-10</lastmod>
+         <lastmod>2023-11-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://wayfair-incubator.github.io/gbq/dev/getting-started/</loc>
-         <lastmod>2023-11-10</lastmod>
+         <lastmod>2023-11-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
