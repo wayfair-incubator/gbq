@@ -5,7 +5,7 @@ flake8==6.1.0
 isort==5.13.2
 hyper-bump-it==0.5.2; python_version >= '3.9'
 livereload==2.6.3
-mypy==1.7.0
+mypy==1.8.0
 pytest==7.4.4
 pytest-cov==4.1.0
 pytest-mock==3.12.0
