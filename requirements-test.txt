@@ -1,6 +1,6 @@
 autoflake==2.3.0
 bandit==1.7.7
-black==23.12.1
+black==24.3.0
 flake8==6.1.0
 isort==5.13.2
 hyper-bump-it==0.5.2; python_version >= '3.9'
