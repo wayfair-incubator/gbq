@@ -36,10 +36,10 @@ def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
 
     for key, value in enumerate(source):
         schema_field = SchemaField(
-            name = str(value.get("name")),
-            field_type = str(value.get("type")),
-            mode = value.get("mode", "NULLABLE"),
-            description = value.get("description", None),
+            name=str(value.get("name")),
+            field_type=str(value.get("type")),
+            mode=value.get("mode", "NULLABLE"),
+            description=value.get("description", None),
         )
 
         # Add the field to the list of fields
