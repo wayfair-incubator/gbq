@@ -73,12 +73,23 @@ def nested_json_schema():
         {"name": "username", "mode": "NULLABLE", "type": "STRING"},
         {
             "fields": [
-                {"name": "id", "mode": "NULLABLE", "type": "INTEGER"},
-                {"name": "street", "mode": "NULLABLE", "type": "STRING"},
+                {
+                    "name": "id",
+                    "mode": "NULLABLE",
+                    "type": "INTEGER",
+                    "description": "ID DESCRIPTION",
+                },
+                {
+                    "name": "street",
+                    "mode": "NULLABLE",
+                    "type": "STRING",
+                    "description": "STREET DESCRIPTION",
+                },
             ],
             "name": "address",
             "mode": "REPEATED",
             "type": "RECORD",
+            "description": "ADDRESS DESCRIPTION",
         },
     ]
 

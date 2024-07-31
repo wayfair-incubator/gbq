@@ -42,10 +42,12 @@ def test_get_bq_credentials(mocker):
 
 
 def test_convert_to_bq_schema(nested_json_schema):
-    address_schema = SchemaField("address", "RECORD", "REPEATED")
+    address_schema = SchemaField(
+        "address", "RECORD", "REPEATED", None, "ADDRESS DESCRIPTION"
+    )
     address_nested_schema = [
-        SchemaField("id", "INTEGER", "NULLABLE"),
-        SchemaField("street", "STRING", "NULLABLE"),
+        SchemaField("id", "INTEGER", "NULLABLE", None, "ID DESCRIPTION"),
+        SchemaField("street", "STRING", "NULLABLE", None, "STREET DESCRIPTION"),
     ]
     address_schema._fields = address_nested_schema
     expected = [
