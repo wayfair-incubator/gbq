@@ -33,6 +33,7 @@ def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
     """
     # SchemaField list
     schema: List[SchemaField] = []
+
     for key, value in enumerate(source):
         schema_field = SchemaField(
             name=str(value.get("name")),
@@ -40,11 +41,14 @@ def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
             mode=value.get("mode", "NULLABLE"),
             description=value.get("description", None),
         )
+
         # Add the field to the list of fields
         schema.append(schema_field)
+
         # If it is a STRUCT / RECORD field we start the recursion
         if schema_field.field_type == "RECORD":
             schema_field._fields = get_bq_schema_from_json_schema(value.get("fields", []))  # type: ignore
+
     return schema
 
 
