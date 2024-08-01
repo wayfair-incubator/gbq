@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.5] - 2024-08-01
 
+### Fixed
+- Fix BigQuery SchemaField descriptions
+
 ### Internal
 
 - Use [hatch][hatch] for build backend.
