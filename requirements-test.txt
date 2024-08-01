@@ -3,7 +3,7 @@ bandit==1.7.7
 black==23.12.1
 flake8==6.1.0
 isort==5.13.2
-hyper-bump-it==0.5.2; python_version >= '3.9'
+hyper-bump-it==0.5.3; python_version >= '3.9'
 livereload==2.6.3
 mypy==1.8.0
 pytest==7.4.4
