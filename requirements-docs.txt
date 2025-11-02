@@ -1,13 +1,15 @@
-mike==2.0.0
+mike==2.1.1
 
 # mike implicitly depends on pkg_resources from setuptools.
 # It has been addressed as part of the work towards 2.0, but that has not been released yet
 # https://github.com/jimporter/mike/issues/148
-setuptools==68.2.2
+setuptools==75.6.0
 
 markdown-include==0.8.1
-mkdocs==1.5.3
-mkdocs-material==9.5.10
+mkdocs==1.6.1
+mkdocs-material==9.5.49
 mkdocs-minify-plugin==0.8.0
-mkdocs-redirects==1.2.1
-mkdocstrings[python]==0.24.0
+mkdocs-redirects==1.2.2
+# Pin specific versions that are compatible with Python 3.14
+mkdocstrings[python]==0.27.0
+mkdocs-autorefs==1.4.3

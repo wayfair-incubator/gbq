@@ -3,7 +3,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/gbq)][pypi]
 [![codecov](https://codecov.io/gh/wayfair-incubator/gbq/branch/main/graph/badge.svg)][codecov]
 [![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)][mypy-home]
-[![Code style: black](https://img.shields.io/badge/code%20style-black-black.svg)][black-home]
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)][ruff-home]
 
 
 # GBQ
@@ -46,16 +46,14 @@ Check out the [project documentation](https://wayfair-incubator.github.io/gbq/)
 [ci]: https://github.com/wayfair-incubator/gbq/actions
 [codecov]: https://codecov.io/gh/wayfair-incubator/gbq
 [mypy-home]: http://mypy-lang.org/
-[black-home]: https://github.com/psf/black
+[ruff-home]: https://github.com/astral-sh/ruff
 [install-docker]: https://docs.docker.com/install/
 [pdbpp-home]: https://github.com/pdbpp/pdbpp
 [pdb-docs]: https://docs.python.org/3/library/pdb.html
 [pdbpp-docs]: https://github.com/pdbpp/pdbpp#usage
 [pytest-docs]: https://docs.pytest.org/en/latest/
 [mypy-docs]: https://mypy.readthedocs.io/en/stable/
-[black-docs]: https://black.readthedocs.io/en/stable/
-[isort-docs]: https://pycqa.github.io/isort/
-[flake8-docs]: http://flake8.pycqa.org/en/stable/
+[ruff-docs]: https://docs.astral.sh/ruff/
 [bandit-docs]: https://bandit.readthedocs.io/en/stable/
 [sem-ver]: https://semver.org/
 [pypi]: https://semver.org/

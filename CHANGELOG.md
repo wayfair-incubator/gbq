@@ -4,10 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Changed
-- Fixed get_bq_schema_from_json_schema() SchemaField parameters
-
 ## [Unreleased]
+
+## [1.1.0] - 2025-11-02
+
+### Added
+- Support for Python 3.10, 3.11, 3.12, 3.13, and 3.14
+- Replaced `pip` with `uv` package manager for faster dependency resolution
+- Replaced `black`, `isort`, `flake8`, and `autoflake` with `ruff` for unified linting and formatting
+
+### Changed
+- Upgraded Pydantic from v1 to v2.12.3
+- Upgraded all core dependencies to latest versions:
+  - `google-cloud-bigquery` to 3.38.0
+  - `google-api-core` to 2.28.1
+  - `google-auth` to 2.42.1
+  - `google-cloud-core` to 2.5.0
+  - `google-crc32c` to 1.7.1
+  - `google-resumable-media` to 2.7.2
+  - `googleapis-common-protos` to 1.71.0
+- Updated documentation dependencies for Python 3.14 compatibility:
+  - `mkdocs` to 1.6.1
+  - `mkdocs-material` to 9.5.49
+  - `mkdocstrings[python]` to 0.27.0
+  - `mike` to 2.1.1
+- Updated CI workflow to use Docker Compose V2 (`docker compose` instead of `docker-compose`)
+- Moved bandit configuration from `.bandit` file to `pyproject.toml`
+- Updated `pyproject.toml` with ruff configuration for linting and formatting
+
+### Removed
+- Support for Python 3.8 and 3.9
+- Individual linter configurations (`.flake8`, `[tool.black]`, `[tool.isort]`)
+
+### Fixed
+- Fixed `SchemaField` API compatibility with google-cloud-bigquery 3.x
+- Fixed `QueryJob` instantiation in tests for google-cloud-bigquery 3.x compatibility
+- Fixed REPEATED mode detection for list-based schema fields in `get_bq_schema_from_record()`
+- Fixed Pydantic v2 `model_validator` compatibility issues
+- Fixed Docker Compose V2 compatibility in CI workflows
+
+### Internal
+- Updated Dockerfile to use Python 3.14
+- Installed `uv` in Docker images for package management
+- Updated test fixtures and helpers for new API compatibility
+- Regenerated `requirements.lock` with updated dependencies
 
 ## [1.0.5] - 2024-08-01
 

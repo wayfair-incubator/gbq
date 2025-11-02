@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pytest
 from google.cloud.bigquery import SchemaField
 
@@ -13,22 +11,18 @@ from gbq.helpers import (
 
 
 @pytest.fixture()
-def key_value_schema() -> Tuple:
-    return tuple(
-        [
-            SchemaField("key", "STRING", "NULLABLE"),
-            SchemaField("value", "INTEGER", "NULLABLE"),
-        ]
+def key_value_schema() -> tuple:
+    return (
+        SchemaField("key", "STRING", "NULLABLE"),
+        SchemaField("value", "INTEGER", "NULLABLE"),
     )
 
 
 @pytest.fixture()
-def string_key_value_schema() -> Tuple:
-    return tuple(
-        [
-            SchemaField("key", "STRING", "NULLABLE"),
-            SchemaField("value", "STRING", "NULLABLE"),
-        ]
+def string_key_value_schema() -> tuple:
+    return (
+        SchemaField("key", "STRING", "NULLABLE"),
+        SchemaField("value", "STRING", "NULLABLE"),
     )
 
 
@@ -42,17 +36,20 @@ def test_get_bq_credentials(mocker):
 
 
 def test_convert_to_bq_schema(nested_json_schema):
-    address_schema = SchemaField(
-        "address", "RECORD", "REPEATED", None, "ADDRESS DESCRIPTION"
-    )
     address_nested_schema = [
-        SchemaField("id", "INTEGER", "NULLABLE", None, "ID DESCRIPTION"),
-        SchemaField("street", "STRING", "NULLABLE", None, "STREET DESCRIPTION"),
+        SchemaField("id", "INTEGER", "NULLABLE", description="ID DESCRIPTION"),
+        SchemaField("street", "STRING", "NULLABLE", description="STREET DESCRIPTION"),
     ]
-    address_schema._fields = address_nested_schema
+    address_schema = SchemaField(
+        "address",
+        "RECORD",
+        "REPEATED",
+        description="ADDRESS DESCRIPTION",
+        fields=tuple(address_nested_schema),
+    )
     expected = [
-        SchemaField("id", "INTEGER", "NULLABLE"),
-        SchemaField("username", "STRING", "NULLABLE"),
+        SchemaField("id", "INTEGER", "NULLABLE", description=""),
+        SchemaField("username", "STRING", "NULLABLE", description=""),
         address_schema,
     ]
 
@@ -71,18 +68,16 @@ def test__check_if_map_false():
 
 
 def test__map_raw_dictionary_to_bq_schema(string_key_value_schema):
-    dates_schema = SchemaField("dates", "RECORD", "REPEATED")
-    dates_schema._fields = string_key_value_schema
-
-    data_schema = SchemaField("data", "RECORD", "REPEATED")
-    data_nested_schema = tuple(
-        [
-            SchemaField("id", "INTEGER", "NULLABLE"),
-            SchemaField("street", "STRING", "NULLABLE"),
-            dates_schema,
-        ]
+    dates_schema = SchemaField(
+        "dates", "RECORD", "REPEATED", fields=string_key_value_schema
     )
-    data_schema._fields = data_nested_schema
+
+    data_nested_schema = (
+        SchemaField("id", "INTEGER", "NULLABLE"),
+        SchemaField("street", "STRING", "NULLABLE"),
+        dates_schema,
+    )
+    data_schema = SchemaField("data", "RECORD", "REPEATED", fields=data_nested_schema)
     expected = [
         SchemaField("request_id", "INTEGER", "NULLABLE"),
         SchemaField("numbers", "INTEGER", "REPEATED"),
@@ -126,15 +121,14 @@ def test_get_bq_schema_from_raw_data_dictionary_list_of_int():
 
 
 def test_get_bq_schema_from_raw_data_dictionary_list_of_dicts():
-    nested_fields = tuple(
-        [
-            SchemaField("id", "INTEGER", "NULLABLE"),
-            SchemaField("value", "FLOAT", "NULLABLE"),
-            SchemaField("comment", "STRING", "NULLABLE"),
-        ]
+    nested_fields = (
+        SchemaField("id", "INTEGER", "NULLABLE"),
+        SchemaField("value", "FLOAT", "NULLABLE"),
+        SchemaField("comment", "STRING", "NULLABLE"),
     )
-    some_data_schema = SchemaField("some_data", "RECORD", "REPEATED")
-    some_data_schema._fields = nested_fields
+    some_data_schema = SchemaField(
+        "some_data", "RECORD", "REPEATED", fields=nested_fields
+    )
 
     expected = [
         SchemaField("request_id", "INTEGER", "NULLABLE"),
@@ -171,21 +165,12 @@ def test_get_bq_schema_from_raw_data_dictionary_empty_list():
 def test_get_bq_schema_from_raw_data_dictionary_maps(
     key_value_schema, string_key_value_schema
 ):
-    repeated_record_schema = SchemaField("repeated_record", "RECORD", "REPEATED")
-    repeated_record_schema._fields = key_value_schema
-
-    some_ids_schema = SchemaField("some_ids", "RECORD", "REPEATED")
-    some_ids_schema._fields = string_key_value_schema
-
-    some_data = tuple(
-        [
-            SchemaField("id", "INTEGER", "NULLABLE"),
-            SchemaField("value", "FLOAT", "NULLABLE"),
-            SchemaField("comment", "STRING", "NULLABLE"),
-        ]
+    repeated_record_schema = SchemaField(
+        "repeated_record", "RECORD", "REPEATED", fields=key_value_schema
     )
-    some_data_schema = SchemaField("some_data", "RECORD", "REPEATED")
-    some_data_schema._fields = some_data
+    some_ids_schema = SchemaField(
+        "some_ids", "RECORD", "REPEATED", fields=string_key_value_schema
+    )
 
     expected = [
         SchemaField("request_id", "INTEGER", "NULLABLE"),
@@ -204,15 +189,14 @@ def test_get_bq_schema_from_raw_data_dictionary_maps(
 
 
 def test_get_bq_schema_from_raw_data_dictionary_dict():
-    some_data_fields = tuple(
-        [
-            SchemaField("id", "INTEGER", "NULLABLE"),
-            SchemaField("value", "FLOAT", "NULLABLE"),
-            SchemaField("comment", "STRING", "NULLABLE"),
-        ]
+    some_data_fields = (
+        SchemaField("id", "INTEGER", "NULLABLE"),
+        SchemaField("value", "FLOAT", "NULLABLE"),
+        SchemaField("comment", "STRING", "NULLABLE"),
     )
-    some_data_schema = SchemaField("some_data", "RECORD", "NULLABLE")
-    some_data_schema._fields = some_data_fields
+    some_data_schema = SchemaField(
+        "some_data", "RECORD", "NULLABLE", fields=some_data_fields
+    )
 
     expected = [
         SchemaField("request_id", "INTEGER", "NULLABLE"),

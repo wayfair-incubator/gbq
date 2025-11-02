@@ -8,9 +8,29 @@ on:
       branches: ["main"]
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
 
 jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Set up Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install dependencies
+        uses: ./.github/actions/install-dependencies
+        with:
+          test-requirements: "true"
+
+      - name: Run ruff linter
+        run: ruff check gbq tests
+
+      - name: Run ruff formatter
+        run: ruff format --check gbq tests
+
   bandit:
     runs-on: ubuntu-latest
     steps:
@@ -25,56 +45,7 @@ jobs:
           test-requirements: "true"
 
       - name: Run bandit
-        run: bandit --ini .bandit -r gbq
-
-  black:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Set up Python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        uses: ./.github/actions/install-dependencies
-        with:
-          test-requirements: "true"
-
-      - name: Run black
-        run: black --check gbq tests
-
-  flake8:
-    runs-on: ubuntu-latest
-    steps:
-        - name: Check out code
-          uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
-          with:
-            python-version: ${{ env.PYTHON_VERSION }}
-        - name: Install dependencies
-          uses: ./.github/actions/install-dependencies
-          with:
-            test-requirements: "true"
-
-        - name: Run flake8
-          run: flake8 gbq tests
-
-  isort:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        uses: ./.github/actions/install-dependencies
-        with:
-          test-requirements: "true"
-
-      - name: Run isort
-        run: isort --check-only gbq tests
+        run: bandit -c pyproject.toml -r gbq
 
   mypy:
     runs-on: ubuntu-latest
@@ -90,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
     steps:
         - name: Check out code
           uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -133,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12" ]
+        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
     steps:
       - name: Check out code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -153,7 +124,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Build devbox image
-        run: "docker-compose build devbox"
+        run: "docker compose build devbox"
 
   build-docs:
     runs-on: ubuntu-latest

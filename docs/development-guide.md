@@ -16,13 +16,13 @@ details on how to [install docker][install-docker] on your computer.
 Once that is configured, the test suite can be run locally:
 
 ```bash
-docker-compose run --rm test
+docker compose run --rm test
 ```
 
 If you want to be able to execute code in the container:
 
 ```bash
-docker-compose run --rm devbox
+docker compose run --rm devbox
 (your code here)
 ```
 
@@ -50,11 +50,11 @@ See the documentation on [pdb][pdb-docs] and [pdb++][pdbpp-docs] for more inform
 You'll be unable to merge code unless the linting and tests pass. You can run these in your container via:
 
 ```bash
-docker-compose run --rm test
+docker compose run --rm test
 ```
 
 This will run the same tests, linting, and code coverage that are run by the CI pipeline. The only difference is that,
-when run locally, `black` and `isort` are configured to automatically correct issues they detect.
+when run locally, `ruff` is configured to automatically fix issues it detects (with the `--format-code` flag).
 
 Generally we should endeavor to write tests for every feature. Every new feature branch should increase the test
 coverage rather than decreasing it.
@@ -67,10 +67,8 @@ To customize / override a specific testing stage, please read the documentation 
 
 1. [PyTest][pytest-docs]
 2. [MyPy][mypy-docs]
-3. [Black][black-docs]
-4. [Isort][isort-docs]
-5. [Flake8][flake8-docs]
-6. [Bandit][bandit-docs]
+3. [Ruff][ruff-docs]
+4. [Bandit][bandit-docs]
 
 ### Building the Library
 
@@ -119,8 +117,8 @@ This same pipeline also runs on the default branch when a maintainer merges a pu
 
 ### Lints
 
-The first set of jobs that run as part of the CI pipline are linters that perform static analysis on the code. This
-includes: [MyPy][mypy-docs], [Black][black-docs], [Isort][isort-docs], [Flake8][flake8-docs], and [Bandit][bandit-docs].
+The first set of jobs that run as part of the CI pipeline are linters that perform static analysis on the code. This
+includes: [MyPy][mypy-docs], [Ruff][ruff-docs], and [Bandit][bandit-docs].
 
 ### Tests
 
@@ -145,9 +143,7 @@ The pipeline runs the tests cases across each supported version of Python to ens
 [pdbpp-docs]: https://github.com/pdbpp/pdbpp#usage
 [pytest-docs]: https://docs.pytest.org/en/latest/
 [mypy-docs]: https://mypy.readthedocs.io/en/stable/
-[black-docs]: https://black.readthedocs.io/en/stable/
-[isort-docs]: https://pycqa.github.io/isort/
-[flake8-docs]: http://flake8.pycqa.org/en/stable/
+[ruff-docs]: https://docs.astral.sh/ruff/
 [bandit-docs]: https://bandit.readthedocs.io/en/stable/
 [sem-ver]: https://semver.org/
 [pep-517]: https://www.python.org/dev/peps/pep-0517

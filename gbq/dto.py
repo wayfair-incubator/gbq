@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -42,14 +41,15 @@ class BigQueryDataType(Enum):
 
 class TimeDefinition(BaseModel):
     type: TimeType
-    expirationMs: Optional[str] = None
-    field: Optional[str] = None
+    expirationMs: str | None = None
+    field: str | None = None
 
-    @model_validator(mode="before")  # type: ignore[arg-type]
-    def str_or_list_(self):
-        if isinstance(self.get("type"), str):
-            self["type"] = TimeType[self.get("type", "").upper()]
-        return self
+    @model_validator(mode="before")
+    @classmethod
+    def str_or_list_(cls, data):
+        if isinstance(data, dict) and isinstance(data.get("type"), str):
+            data["type"] = TimeType[data.get("type", "").upper()]
+        return data
 
 
 class RangeFieldDefinition(BaseModel):
@@ -65,46 +65,58 @@ class RangeDefinition(BaseModel):
 
 class Partition(BaseModel):
     type: PartitionType
-    definition: Union[TimeDefinition, RangeDefinition]
+    definition: TimeDefinition | RangeDefinition
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_type(cls, data):
+        if isinstance(data, dict) and isinstance(data.get("type"), str):
+            data["type"] = PartitionType[data.get("type", "").lower()]
+        return data
 
 
 class Argument(BaseModel):
     name: str
     data_type: BigQueryDataType
 
-    @model_validator(mode="before")  # type: ignore[arg-type]
-    def str_or_list_(self):
-        if isinstance(self.get("data_type"), str):
-            self["data_type"] = BigQueryDataType[self.get("data_type", "").upper()]
-        return self
+    @model_validator(mode="before")
+    @classmethod
+    def str_or_list_(cls, data):
+        if isinstance(data, dict) and isinstance(data.get("data_type"), str):
+            data["data_type"] = BigQueryDataType[data.get("data_type", "").upper()]
+        return data
 
 
 class Structure(BaseModel):
-    table_schema: List[Dict] = Field([], alias="schema")
-    partition: Union[Partition, None] = None
-    clustering: Union[List[str], None] = None
-    labels: Dict[str, str] = Field({})
-    description: Union[str, None] = None
-    view_query: Union[str, None] = None
-    body: Union[str, None] = None
-    type: Union[StructureType, None] = None
-    arguments: Union[List[Argument], None] = None
+    table_schema: list[dict] = Field([], alias="schema")
+    partition: Partition | None = None
+    clustering: list[str] | None = None
+    labels: dict[str, str] = Field({})
+    description: str | None = None
+    view_query: str | None = None
+    body: str | None = None
+    type: StructureType | None = None
+    arguments: list[Argument] | None = None
 
-    @model_validator(mode="before")  # type: ignore[arg-type]
-    def validate_type(self):
-        if not self.get("type", None):
-            if self.get("view_query"):
-                self["type"] = StructureType.view
-            elif self.get("body"):
-                self["type"] = StructureType.stored_procedure
+    @model_validator(mode="before")
+    @classmethod
+    def validate_type(cls, data):
+        if isinstance(data, dict) and not data.get("type", None):
+            if data.get("view_query"):
+                data["type"] = StructureType.view
+            elif data.get("body"):
+                data["type"] = StructureType.stored_procedure
             else:
-                self["type"] = StructureType.table
-        return self
+                data["type"] = StructureType.table
+        return data
 
-    @model_validator(mode="before")  # type: ignore[arg-type]
-    def str_or_list_body(self):
-        if isinstance(self.get("body"), list) and not [
-            s for s in self.get("body") if not isinstance(s, str)
-        ]:
-            self["body"] = "\n".join(self["body"])
-        return self
+    @model_validator(mode="before")
+    @classmethod
+    def str_or_list_body(cls, data):
+        if (
+            isinstance(data, dict)
+            and isinstance(data.get("body"), list)
+            and not [s for s in data.get("body") if not isinstance(s, str)]
+        ):
+            data["body"] = "\n".join(data["body"])
+        return data
