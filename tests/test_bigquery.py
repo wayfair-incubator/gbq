@@ -31,7 +31,9 @@ def bq(mocker) -> BigQuery:
     mocker.patch(
         "gbq.helpers.service_account.Credentials.from_service_account_info"
     ).return_value = '{"secret": "secret"}'
-    mocker.patch("gbq.bigquery.bigquery.Client")
+    mock_client = mocker.patch("gbq.bigquery.bigquery.Client")
+    # Ensure the mock client has a project attribute for QueryJob compatibility
+    mock_client.return_value.project = "project"
     return BigQuery('{"secret": "secret"}', "project")
 
 
@@ -481,14 +483,14 @@ def test_execute_raise_exception(bq):
         bq.execute("SELECT * FROM some_table")
 
 
-def test_execute_raise_no_exception(bq):
+def test_execute_raise_no_exception(bq, mocker):
     query = "SELECT * FROM some_table"
-    bq.bq_client.query.return_value = QueryJob(
-        job_id="test_id", query=query, client=bq.bq_client
-    )
+    # Use a mock instead of creating a real QueryJob to avoid compatibility issues
+    mock_query_job = mocker.Mock(spec=QueryJob)
+    bq.bq_client.query.return_value = mock_query_job
     response = bq.execute(query=query)
 
-    assert isinstance(response, QueryJob)
+    assert response == mock_query_job
 
 
 def test_argument_class_data_type():

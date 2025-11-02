@@ -2,8 +2,7 @@
 
 set -eo pipefail
 
-BLACK_ACTION="--check"
-ISORT_ACTION="--check-only"
+RUFF_FIX=""
 
 function usage
 {
@@ -17,8 +16,7 @@ while [[ $# -gt 0 ]]; do
     arg="$1"
     case $arg in
         --format-code)
-        BLACK_ACTION="--quiet"
-        ISORT_ACTION=""
+        RUFF_FIX="--fix"
         ;;
         -h|--help)
         usage
@@ -37,20 +35,18 @@ done
 # only generate html locally
 pytest tests --cov-report html
 
-echo "Running autoflake..."
-autoflake -irv --remove-all-unused-import gbq tests
+echo "Running ruff linter..."
+ruff check ${RUFF_FIX} gbq tests
 
-echo "Running isort..."
-isort ${ISORT_ACTION} gbq tests
-
-echo "Running black..."
-black ${BLACK_ACTION} gbq tests
-
-echo "Running flake8..."
-flake8 gbq tests
+echo "Running ruff formatter..."
+if [ -z "${RUFF_FIX}" ]; then
+    ruff format --check gbq tests
+else
+    ruff format gbq tests
+fi
 
 echo "Running mypy..."
 mypy gbq
 
 echo "Running bandit..."
-bandit --ini .bandit --quiet -r gbq
+bandit -c pyproject.toml --quiet -r gbq

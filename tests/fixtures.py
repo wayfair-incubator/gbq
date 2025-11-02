@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import pytest
 
 from gbq.dto import Structure
@@ -31,9 +29,9 @@ class Table:
         dataset_id: str,
         table_id: str,
         table_type: str,
-        schema: Optional[List[SchemaField]] = None,
-        view_query: Optional[str] = None,
-        clustering_fields: Optional[list] = None,
+        schema: list[SchemaField] | None = None,
+        view_query: str | None = None,
+        clustering_fields: list | None = None,
         time_partitioning=None,
         range_partitioning=None,
         labels=None,
@@ -150,7 +148,7 @@ def nested_json_schema_with_description(nested_json_schema):
 
 
 @pytest.fixture()
-def dataset_list_items() -> List[DatasetListItem]:
+def dataset_list_items() -> list[DatasetListItem]:
     return [
         DatasetListItem(dataset_id="abc", project="project"),
         DatasetListItem(dataset_id="def", project="project"),
@@ -158,7 +156,7 @@ def dataset_list_items() -> List[DatasetListItem]:
 
 
 @pytest.fixture()
-def tables() -> List[Table]:
+def tables() -> list[Table]:
     return [
         Table(project="project", dataset_id="abc", table_id="123", table_type="TABLE"),
         Table(project="project", dataset_id="def", table_id="456", table_type="TABLE"),
@@ -166,7 +164,7 @@ def tables() -> List[Table]:
 
 
 @pytest.fixture()
-def table_view() -> List[Table]:
+def table_view() -> list[Table]:
     return [
         Table(project="project", dataset_id="abc", table_id="123", table_type="TABLE"),
         Table(project="project", dataset_id="def", table_id="456", table_type="VIEW"),
@@ -174,7 +172,7 @@ def table_view() -> List[Table]:
 
 
 @pytest.fixture()
-def views() -> List[Table]:
+def views() -> list[Table]:
     return [
         Table(project="project", dataset_id="abc", table_id="123", table_type="VIEW"),
         Table(project="project", dataset_id="def", table_id="456", table_type="VIEW"),
@@ -182,7 +180,7 @@ def views() -> List[Table]:
 
 
 @pytest.fixture()
-def schema_fields() -> List[SchemaField]:
+def schema_fields() -> list[SchemaField]:
     return [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
         SchemaField(name="username", mode="NULLABLE", field_type="STRING"),
@@ -190,7 +188,7 @@ def schema_fields() -> List[SchemaField]:
 
 
 @pytest.fixture()
-def nested_schema_fields() -> List[SchemaField]:
+def nested_schema_fields() -> list[SchemaField]:
     nested_fields = [
         SchemaField(name="id", mode="NULLABLE", field_type="INTEGER"),
         SchemaField(name="username", mode="NULLABLE", field_type="STRING"),

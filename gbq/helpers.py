@@ -1,7 +1,6 @@
 import datetime
 import json
 from collections import defaultdict
-from typing import Dict, List
 
 from google.cloud.bigquery import SchemaField
 from google.oauth2 import service_account
@@ -27,32 +26,36 @@ def get_bq_credentials(credential: str):
     return service_account.Credentials.from_service_account_info(json.loads(credential))
 
 
-def get_bq_schema_from_json_schema(source: List[Dict]) -> List[SchemaField]:
+def get_bq_schema_from_json_schema(source: list[dict]) -> list[SchemaField]:
     """
     Function coverts json table schema for a BQ table to a list of BQ SchemaField objects.
     """
     # SchemaField list
-    schema: List[SchemaField] = []
+    schema: list[SchemaField] = []
 
-    for key, value in enumerate(source):
+    for _key, value in enumerate(source):
+        description = value.get("description", None)
+        fields = None
+
+        # If it is a STRUCT / RECORD field we need to recursively process nested fields
+        if value.get("type") == "RECORD":
+            fields = get_bq_schema_from_json_schema(value.get("fields", []))
+
         schema_field = SchemaField(
             name=str(value.get("name")),
             field_type=str(value.get("type")),
             mode=value.get("mode", "NULLABLE"),
-            description=value.get("description", None),
+            description=description if description is not None else "",
+            fields=tuple(fields) if fields else (),
         )
 
         # Add the field to the list of fields
         schema.append(schema_field)
 
-        # If it is a STRUCT / RECORD field we start the recursion
-        if schema_field.field_type == "RECORD":
-            schema_field._fields = get_bq_schema_from_json_schema(value.get("fields", []))  # type: ignore
-
     return schema
 
 
-def get_bq_schema_from_record(raw_data: dict) -> List[SchemaField]:
+def get_bq_schema_from_record(raw_data: dict) -> list[SchemaField]:
     """
     Function builds a BQ Table schema from raw data of the table.
     """
@@ -68,10 +71,7 @@ def _check_if_map(value: dict):
         based on whether the dictionary in question is a map or not.
     """
     keys = value.keys()
-    for key in keys:
-        if not key.isdigit():
-            return False
-    return True
+    return all(key.isdigit() for key in keys)
 
 
 # flake8: noqa: C901
@@ -116,30 +116,45 @@ def _handle_dictionary(data, flat_data, key):
         ]
 
 
-def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> List[SchemaField]:
+def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> list[SchemaField]:
     """
-    Function loops over a dictionary of raw dara and returns a BQ Table schema object.
+    Function loops over a dictionary of raw data and returns a BQ Table schema object.
     """
     # SchemaField list
-    schema: List[SchemaField] = []
+    schema: list[SchemaField] = []
 
     # Iterate the existing dictionary
     for key, value in raw_data.items():
+        nested_fields: tuple = ()
+        mode = "NULLABLE"  # Default mode
+
+        # Determine if we need nested fields
+        if value and (
+            isinstance(value, dict)
+            or (isinstance(value, list) and value and isinstance(value[0], dict))
+        ):
+            field_type_str = "RECORD"
+            if isinstance(value, dict):
+                nested_fields = tuple(_map_raw_dictionary_to_bq_schema(value))
+            else:
+                nested_fields = tuple(_map_raw_dictionary_to_bq_schema(value[0]))
+                mode = "REPEATED"  # Lists of dicts should be REPEATED
+        else:
+            field_type_str = None
+
         try:
             # NULLABLE By Default
-            schema_field = SchemaField(key, field_type[type(value)])
+            if field_type_str:
+                schema_field = SchemaField(
+                    key, field_type_str, mode=mode, fields=nested_fields
+                )
+            else:
+                schema_field = SchemaField(key, field_type[type(value)])
         except KeyError:
             schema_field = _handle_exception(key, schema_field, value)
 
         # Add the field to the list of fields
         schema.append(schema_field)
-
-        # If it is a STRUCT / RECORD field we start the recursion
-        if schema_field.field_type == "RECORD" and value:
-            if isinstance(value, dict):
-                schema_field._fields = tuple(_map_raw_dictionary_to_bq_schema(value))
-            else:
-                schema_field._fields = tuple(_map_raw_dictionary_to_bq_schema(value[0]))
 
     # Return the dictionary values
     return schema

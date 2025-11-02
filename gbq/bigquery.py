@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional, Union
-
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 from google.cloud.bigquery import QueryJob
@@ -30,11 +28,11 @@ class BigQuery:
             Project bound to the operation.
     """
 
-    def __init__(self, svc_account: str, project: Optional[str] = None):
+    def __init__(self, svc_account: str, project: str | None = None):
         self.credentials = get_bq_credentials(svc_account)
         self.bq_client = bigquery.Client(credentials=self.credentials, project=project)
 
-    def get_dataset_in_project(self, project: str) -> List[DatasetListItem]:
+    def get_dataset_in_project(self, project: str) -> list[DatasetListItem]:
         """
         Function returns list of DatasetListItem objects of all the datasets in a project.
 
@@ -46,7 +44,7 @@ class BigQuery:
             List[DatasetListItem]: A list of object of BigQuery DatasetListItem.
         """
         self.bq_client.project = project
-        datasets: List[DatasetListItem] = list(self.bq_client.list_datasets())
+        datasets: list[DatasetListItem] = list(self.bq_client.list_datasets())
         return datasets
 
     def delete_dataset(self, project: str, dataset: str):
@@ -72,7 +70,7 @@ class BigQuery:
 
         return True
 
-    def get_table_in_project(self, project: str) -> List[Table]:
+    def get_table_in_project(self, project: str) -> list[Table]:
         """
         Function returns list of Table objects of all the tables and views in a project.
 
@@ -83,9 +81,9 @@ class BigQuery:
         Returns:
             List[Table]: A list of object of BigQuery Table.
         """
-        tables: List[Table] = []
+        tables: list[Table] = []
         self.bq_client.project = project
-        datasets: List[DatasetListItem] = self.get_dataset_in_project(project)
+        datasets: list[DatasetListItem] = self.get_dataset_in_project(project)
         for dataset in datasets:
             tables_in_dataset = self.bq_client.list_tables(
                 f"{dataset.project}.{dataset.dataset_id}"
@@ -164,8 +162,8 @@ class BigQuery:
         project: str,
         dataset: str,
         structure_id: str,
-        json_schema: Union[List[Dict], Dict],
-    ) -> Union[Table, Routine]:
+        json_schema: list[dict] | dict,
+    ) -> Table | Routine:
         """
         Function creates/updates provided json schema to the structure.
 
@@ -299,7 +297,7 @@ class BigQuery:
             )
 
     @staticmethod
-    def _get_structure(json_schema: Union[Dict, List[Dict]]) -> Structure:
+    def _get_structure(json_schema: dict | list[dict]) -> Structure:
         """
         Function returns an object of Structure, curated from the input.
 
@@ -425,7 +423,7 @@ class BigQuery:
         return routine
 
     @staticmethod
-    def _handle_routine_arguments(structure: Structure) -> List[RoutineArgument]:
+    def _handle_routine_arguments(structure: Structure) -> list[RoutineArgument]:
         """
         Function returns list of objects RoutineArgument type if any specified
 
