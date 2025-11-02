@@ -74,7 +74,6 @@ def _check_if_map(value: dict):
     return all(key.isdigit() for key in keys)
 
 
-# flake8: noqa: C901
 def _flatten_data(data: dict):
     """
     Function flattens the data.
