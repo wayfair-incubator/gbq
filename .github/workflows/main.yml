@@ -94,7 +94,7 @@ jobs:
           if: ${{ always() }}
 
         - name: Publish coverage results to Codecov
-          uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1a231044 # v4.0.1
+          uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
           with:
             token: 2168e29b-e40e-4ddf-acc3-00907462e93e # not ideal, but limited risk
             file: coverage-${{ matrix.python-version }}.xml
