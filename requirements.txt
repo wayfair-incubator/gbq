@@ -1,4 +1,4 @@
-click==8.3.0
+click==8.3.1
 pydantic==2.12.3
 setuptools==78.1.1
 
