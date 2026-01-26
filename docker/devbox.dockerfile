@@ -25,14 +25,8 @@ RUN mkdir /app && chown ${UID}:${GID} /app
 COPY ./requirements* /app/
 WORKDIR /app
 
-# Install from requirements.txt first, then add test and docs requirements
-# Skip lock file if it's empty or just a comment
-# Install as root since --system requires write access to system site-packages
-RUN if [ -s requirements.lock ] && [ "$(grep -v '^#' requirements.lock | wc -l)" -gt 0 ]; then \
-        uv pip install --system -r requirements.lock -r requirements-test.txt -r requirements-docs.txt; \
-    else \
-        uv pip install --system -r requirements.txt -r requirements-test.txt -r requirements-docs.txt; \
-    fi
+# Install from lock file (contains all deps: main, test, docs)
+RUN uv pip install --system -r requirements.lock
 
 # Change ownership of app directory to user
 RUN chown -R ${UID}:${GID} /app
