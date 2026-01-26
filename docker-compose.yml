@@ -1,5 +1,3 @@
-version: "3.9"
-
 x-mount-app-and-user-git-config: &mount-app-and-user-git-config
   volumes:
     - "./:/app"
@@ -23,6 +21,7 @@ services:
 
   lock-requirements:
     <<: *devbox
+    user: root
     entrypoint: "/bin/bash"
     command: "docker/lock_requirements.sh"
 
