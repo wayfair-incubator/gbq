@@ -35,18 +35,18 @@ done
 # only generate html locally
 pytest tests --cov-report html
 
-echo "Running ruff linter..."
-ruff check ${RUFF_FIX} gbq tests
-
-echo "Running ruff formatter..."
+echo "Running ruff..."
 if [ -z "${RUFF_FIX}" ]; then
+    # ruff check: linter - finds code quality issues (unused imports, bugs, security issues)
+    ruff check gbq tests
+    # ruff format: formatter - ensures consistent code style (indentation, quotes, line length)
     ruff format --check gbq tests
 else
+    # ruff check --fix: auto-fix linting issues where possible
+    ruff check --fix gbq tests
+    # ruff format: auto-format code style
     ruff format gbq tests
 fi
 
 echo "Running mypy..."
 mypy gbq
-
-echo "Running bandit..."
-bandit -c pyproject.toml --quiet -r gbq

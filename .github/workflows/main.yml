@@ -31,22 +31,6 @@ jobs:
       - name: Run ruff formatter
         run: ruff format --check gbq tests
 
-  bandit:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        uses: ./.github/actions/install-dependencies
-        with:
-          test-requirements: "true"
-
-      - name: Run bandit
-        run: bandit -c pyproject.toml -r gbq
-
   mypy:
     runs-on: ubuntu-latest
     steps:
@@ -94,7 +78,7 @@ jobs:
           if: ${{ always() }}
 
         - name: Publish coverage results to Codecov
-          uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+          uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
           with:
             token: 2168e29b-e40e-4ddf-acc3-00907462e93e # not ideal, but limited risk
             file: coverage-${{ matrix.python-version }}.xml
