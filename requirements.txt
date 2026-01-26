@@ -4,7 +4,7 @@ setuptools==80.10.2
 
 # bigquery
 google-api-core==2.29.0
-google-auth==2.47.0
+google-auth==2.48.0
 google-cloud-bigquery==3.40.0
 google-cloud-core==2.5.0
 google-crc32c==1.8.0
