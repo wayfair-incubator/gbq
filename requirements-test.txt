@@ -1,4 +1,4 @@
-ruff==0.14.3
+ruff==0.14.14
 bandit==1.8.6
 hyper-bump-it==0.5.3
 livereload==2.7.1
