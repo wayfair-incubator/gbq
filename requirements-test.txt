@@ -1,4 +1,4 @@
-ruff==0.14.14
+ruff==0.15.0
 hyper-bump-it==0.5.3
 livereload==2.7.1
 mypy==1.19.1
