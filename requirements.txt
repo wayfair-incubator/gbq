@@ -1,6 +1,6 @@
 click==8.3.1
 pydantic==2.12.5
-setuptools==80.10.2
+setuptools==81.0.0
 
 # bigquery
 google-api-core==2.29.0
