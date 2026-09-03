@@ -3,7 +3,7 @@ pydantic==2.12.5
 setuptools==82.0.1
 
 # bigquery
-google-api-core==2.29.0
+google-api-core==2.36.0
 google-auth==2.48.0
 google-cloud-bigquery==3.40.0
 google-cloud-core==2.5.0
