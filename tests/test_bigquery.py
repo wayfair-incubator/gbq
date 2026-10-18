@@ -9,11 +9,13 @@ from gbq.dto import (
     Argument,
     BigQueryDataType,
     Partition,
+    PartitionType,
     RangeDefinition,
     RangeFieldDefinition,
     Structure,
     StructureType,
     TimeDefinition,
+    TimeType,
 )
 from gbq.exceptions import GbqException, InvalidDefinitionException
 from tests.fixtures import (
@@ -564,3 +566,18 @@ def test__get_structure_rejects_unsupported_input(json_schema):
 def test__get_structure_wraps_validation_errors(json_schema, message):
     with pytest.raises(InvalidDefinitionException, match=message):
         BigQuery._get_structure(json_schema)
+
+
+def test_partition_accepts_enum_type():
+    partition = Partition.model_validate(
+        {"type": PartitionType.time, "definition": {"type": TimeType.DAY}}
+    )
+    assert partition.type == PartitionType.time
+    assert partition.definition.type == TimeType.DAY
+
+
+def test_argument_accepts_enum_data_type():
+    argument = Argument.model_validate(
+        {"name": "test", "data_type": BigQueryDataType.STRING}
+    )
+    assert argument.data_type == BigQueryDataType.STRING
