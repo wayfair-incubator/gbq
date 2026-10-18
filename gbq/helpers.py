@@ -5,7 +5,7 @@ from collections import defaultdict
 from google.cloud.bigquery import SchemaField
 from google.oauth2 import service_account
 
-from gbq.exceptions import InvalidDefinitionException
+from gbq.exceptions import GbqException, InvalidDefinitionException
 
 field_type = {
     str: "STRING",
@@ -21,11 +21,26 @@ field_type = {
 }
 
 
-def get_bq_credentials(credential: str):
+def get_bq_credentials(credential: str) -> service_account.Credentials:
     """
     Function takes a stringified JSON Service Account and returns a Google Service Account object.
+
+    Raises:
+        GbqException: If the value is not valid service account JSON. The original error is
+            deliberately not chained: json.JSONDecodeError keeps the whole input in its `doc`
+            attribute, and error trackers that capture exception context would record the key.
     """
-    return service_account.Credentials.from_service_account_info(json.loads(credential))
+    try:
+        info = json.loads(credential)
+    except (TypeError, ValueError):
+        raise GbqException("svc_account is not valid service account JSON") from None
+
+    try:
+        return service_account.Credentials.from_service_account_info(info)
+    except (TypeError, ValueError, KeyError):
+        raise GbqException(
+            "svc_account JSON is not in the expected service account format"
+        ) from None
 
 
 def get_bq_schema_from_json_schema(source: list[dict]) -> list[SchemaField]:

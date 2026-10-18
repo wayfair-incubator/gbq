@@ -581,3 +581,85 @@ def test_argument_accepts_enum_data_type():
         {"name": "test", "data_type": BigQueryDataType.STRING}
     )
     assert argument.data_type == BigQueryDataType.STRING
+
+
+def test_create_bigquery_with_credentials_object(mocker):
+    from_info = mocker.patch(
+        "gbq.helpers.service_account.Credentials.from_service_account_info"
+    )
+    client = mocker.patch("gbq.bigquery.bigquery.Client")
+    credentials = mocker.Mock()
+
+    bq = BigQuery(project="project", credentials=credentials)
+
+    from_info.assert_not_called()
+    client.assert_called_once_with(credentials=credentials, project="project")
+    assert bq.credentials is credentials
+
+
+def test_create_bigquery_with_application_default_credentials(mocker):
+    client = mocker.patch("gbq.bigquery.bigquery.Client")
+
+    bq = BigQuery(project="project")
+
+    client.assert_called_once_with(credentials=None, project="project")
+    assert bq.credentials is None
+
+
+def test_create_bigquery_rejects_svc_account_and_credentials(mocker):
+    client = mocker.patch("gbq.bigquery.bigquery.Client")
+
+    with pytest.raises(GbqException, match="not both"):
+        BigQuery('{"secret": "secret"}', "project", credentials=mocker.Mock())
+
+    client.assert_not_called()
+
+
+@pytest.mark.parametrize("delete_contents", [True, False])
+def test_delete_dataset_passes_delete_contents(bq, delete_contents):
+    dataset = object()
+    bq.bq_client.get_dataset.return_value = dataset
+
+    assert bq.delete_dataset("project", "dataset", delete_contents=delete_contents)
+
+    bq.bq_client.delete_dataset.assert_called_once_with(
+        dataset, delete_contents=delete_contents
+    )
+
+
+def test_delete_dataset_deletes_contents_by_default(bq):
+    bq.delete_dataset("project", "dataset")
+
+    _, kwargs = bq.bq_client.delete_dataset.call_args
+    assert kwargs["delete_contents"] is True
+
+
+def test_execute_without_parameters_passes_job_config_through(bq):
+    job_config = bigquery.QueryJobConfig(labels={"team": "abc"})
+
+    bq.execute("SELECT 1", job_config=job_config)
+
+    bq.bq_client.query.assert_called_once_with("SELECT 1", job_config=job_config)
+
+
+def test_execute_with_query_parameters(bq):
+    parameter = bigquery.ScalarQueryParameter("name", "STRING", "x' OR '1'='1")
+
+    bq.execute("SELECT * FROM t WHERE name = @name", query_parameters=[parameter])
+
+    _, kwargs = bq.bq_client.query.call_args
+    assert kwargs["job_config"].query_parameters == [parameter]
+
+
+def test_execute_with_query_parameters_does_not_modify_job_config(bq):
+    job_config = bigquery.QueryJobConfig(labels={"team": "abc"})
+    parameter = bigquery.ScalarQueryParameter("id", "INT64", 1)
+
+    bq.execute("SELECT @id", query_parameters=[parameter], job_config=job_config)
+
+    _, kwargs = bq.bq_client.query.call_args
+    sent = kwargs["job_config"]
+    assert sent is not job_config
+    assert sent.query_parameters == [parameter]
+    assert sent.labels == {"team": "abc"}
+    assert job_config.query_parameters == []
