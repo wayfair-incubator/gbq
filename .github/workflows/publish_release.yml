@@ -7,9 +7,15 @@ on:
   release:
     types: [published]
 
+# Least privilege by default; jobs that push or publish opt in to more.
+permissions:
+  contents: read
+
 jobs:
   update_docs_for_version_bump:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # mike pushes to gh-pages
     steps:
       - name: Check out code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -35,6 +41,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -53,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: "Publish Release"
     permissions:
-      id-token: write
+      id-token: write # PyPI trusted publishing
     needs: ["build-distributions"]
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1

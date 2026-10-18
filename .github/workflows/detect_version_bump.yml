@@ -7,6 +7,10 @@ on:
     branches:
       - "main"
 
+# The release is created with secrets.ACCESS_TOKEN, so GITHUB_TOKEN needs no write access.
+permissions:
+  contents: read
+
 jobs:
   trigger-release:
     runs-on: ubuntu-latest
@@ -18,14 +22,23 @@ jobs:
     steps:
       - name: Get new version
         id: get-new-version
+        # Branch names are user-controlled: pass them through env, never interpolate into the script.
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          NEW_VERSION=$(echo ${{ github.head_ref }} | cut -d _ -f4 )
-          echo "::set-output name=version::$NEW_VERSION"
+          NEW_VERSION=$(echo "${HEAD_REF}" | cut -d _ -f4)
+          if [[ ! "${NEW_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Branch '${HEAD_REF}' does not end in a valid version."
+            exit 1
+          fi
+          echo "version=${NEW_VERSION}" >> "${GITHUB_OUTPUT}"
       - name: Is prerelease?
         id: is-prerelease
+        env:
+          NEW_VERSION: ${{ steps.get-new-version.outputs.version }}
         run: |
-          IS_PRERELEASE=$([[ "${{ steps.get-new-version.outputs.version }}" == *-[a-z]* ]] && echo true || echo false)
-          echo "::set-output name=result::$IS_PRERELEASE"
+          IS_PRERELEASE=$([[ "${NEW_VERSION}" == *-[a-z]* ]] && echo true || echo false)
+          echo "result=${IS_PRERELEASE}" >> "${GITHUB_OUTPUT}"
       - name: Create Release
         # Using full SHA for security
         # https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
