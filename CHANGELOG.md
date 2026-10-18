@@ -58,6 +58,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (a definition that is not a dict or list)
 
 ### Fixed
+- Stored procedure arguments of type `ARRAY` or `STRUCT` were sent without an element type
+  or fields, which BigQuery rejects. `data_type` now accepts full BigQuery types such as
+  `ARRAY<INT64>` and `STRUCT<id INT64, tags ARRAY<STRING>>`, and invalid types raise
+  `InvalidDefinitionException`. `JSON` and `INTERVAL` arguments are also supported
 - Schema conversion kept only name, type, mode, description and nested fields, dropping
   attributes such as `policyTags`, `precision`, `scale`, `maxLength` and
   `defaultValueExpression`. Updates therefore always rewrote the schema and stripped

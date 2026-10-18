@@ -27,6 +27,7 @@ from gbq.dto import (
     Partition,
     PartitionType,
     RangeDefinition,
+    SqlType,
     Structure,
     StructureType,
     TimeDefinition,
@@ -533,7 +534,9 @@ class BigQuery:
         """
         Function creates/updates BigQuery routine per the provided body and arguments.
 
-        NOTE: Currently we only support PROCEDURE type routines.
+        NOTE: Currently we only support PROCEDURE type routines written in SQL. Argument
+        types can be any BigQuery type, e.g. "INT64", "ARRAY<STRING>" or
+        "STRUCT<id INT64, name STRING>".
 
         Args:
             project (str):
@@ -600,14 +603,47 @@ class BigQuery:
             for argument in structure.arguments:
                 arg = RoutineArgument(
                     name=argument.name,
-                    data_type=bigquery.StandardSqlDataType(
-                        type_kind=bigquery.StandardSqlTypeNames[
-                            argument.data_type.value
-                        ]
-                    ),
+                    data_type=BigQuery._to_standard_sql_type(argument.sql_type),
                 )
                 bq_arguments.append(arg)
         return bq_arguments
+
+    @staticmethod
+    def _to_standard_sql_type(sql_type: SqlType) -> bigquery.StandardSqlDataType:
+        """
+        Function converts a parsed SqlType into a BigQuery StandardSqlDataType, including
+        ARRAY element types and STRUCT fields, which BigQuery requires.
+
+        Args:
+            sql_type (SqlType):
+                An object of internal SqlType.
+
+        Returns:
+            bigquery.StandardSqlDataType: The equivalent BigQuery type.
+        """
+        array_element_type = None
+        if sql_type.array_element_type is not None:
+            array_element_type = BigQuery._to_standard_sql_type(
+                sql_type.array_element_type
+            )
+
+        struct_type = None
+        if sql_type.struct_fields:
+            struct_type = bigquery.StandardSqlStructType(
+                fields=[
+                    bigquery.StandardSqlField(
+                        name=field.name,
+                        type=BigQuery._to_standard_sql_type(field.type),
+                    )
+                    for field in sql_type.struct_fields
+                ]
+            )
+
+        return bigquery.StandardSqlDataType(
+            type_kind=bigquery.StandardSqlTypeNames[sql_type.type_kind.value],
+            array_element_type=array_element_type,
+            struct_type=struct_type,
+        )
 
     def _add_partitioning_scheme(
         self, bq_structure: Table, partition_scheme: Partition
