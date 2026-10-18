@@ -110,9 +110,10 @@ To learn the basics of how to start using `gbq`, read the [Getting Started][gett
 
 ## Detailed Documentation
 
-To learn more about the various ways `gbq` can be used, read the Usage Guide page.
+Every method of `BigQuery` and the exceptions it raises are documented in the [API Reference][api].
 
 [ci]: https://github.com/wayfair-incubator/gbq/actions
 [codecov]: https://codecov.io/gh/wayfair-incubator/gbq
 [getting_started]: getting-started.md
+[api]: api.md
 [adc]: https://cloud.google.com/docs/authentication/application-default-credentials
