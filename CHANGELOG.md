@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-18
+
 ### Added
 - Support for Python 3.15
 - `BigQuery(credentials=...)` accepts any `google.auth` credentials object, and
