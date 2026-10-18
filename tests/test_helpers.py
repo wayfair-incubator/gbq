@@ -318,3 +318,46 @@ def test_schemas_equal_detects_changes(other):
 def test_schemas_equal_is_order_sensitive():
     a, b = SchemaField("a", "STRING"), SchemaField("b", "STRING")
     assert not schemas_equal([a, b], [b, a])
+
+
+def test_convert_to_bq_schema_keeps_field_attributes():
+    schema = get_bq_schema_from_json_schema(
+        [
+            {
+                "name": "amount",
+                "type": "NUMERIC",
+                "precision": "10",
+                "scale": "2",
+                "defaultValueExpression": "0",
+                "policyTags": {
+                    "names": ["projects/p/locations/us/taxonomies/1/tags/2"]
+                },
+            },
+            {
+                "name": "address",
+                "type": "STRUCT",
+                "fields": [{"name": "street", "type": "STRING", "maxLength": "50"}],
+            },
+        ]
+    )
+
+    amount, address = schema
+    assert (amount.precision, amount.scale) == (10, 2)
+    assert amount.default_value_expression == "0"
+    assert amount.policy_tags.names == ("projects/p/locations/us/taxonomies/1/tags/2",)
+    assert amount.mode == "NULLABLE"
+    assert amount.description == ""
+    # STRUCT fields are nested like RECORD fields, with the same defaults
+    (street,) = address.fields
+    assert street.max_length == 50
+    assert (street.mode, street.description) == ("NULLABLE", "")
+
+
+def test_convert_to_bq_schema_does_not_mutate_input():
+    source = [
+        {"name": "a", "type": "RECORD", "fields": [{"name": "b", "type": "INT64"}]}
+    ]
+    get_bq_schema_from_json_schema(source)
+    assert source == [
+        {"name": "a", "type": "RECORD", "fields": [{"name": "b", "type": "INT64"}]}
+    ]

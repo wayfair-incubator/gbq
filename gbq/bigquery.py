@@ -312,18 +312,25 @@ class BigQuery:
         """
         Function creates/updates BigQuery Table per the provided information.
 
+        On update the definition is the source of truth: labels, description and
+        clustering that the definition omits are removed from the existing table.
+
         Args:
             project (str):
                 Project bound to the operation.
             dataset (str):
                 ID of dataset containing the table.
             structure_id (str):
-                ID of the routine.
+                ID of the table or view.
             structure (Structure):
                 An object of internal Structure class.
 
         Returns:
-            Routine: An object of BigQuery Routine.
+            Table: An object of BigQuery Table.
+
+        Raises:
+            InvalidDefinitionException: If the definition's partitioning differs from the
+                existing table's in a way BigQuery cannot change in place.
         """
         fields_to_update = []
 
@@ -335,39 +342,109 @@ class BigQuery:
                 if not schemas_equal(schema, list(bq_structure.schema)):
                     fields_to_update.append("schema")
                     bq_structure.schema = schema
+                if self._update_partitioning(bq_structure, structure.partition):
+                    fields_to_update.append("time_partitioning")
             elif structure.type == StructureType.view:
                 if structure.view_query != bq_structure.view_query:
                     fields_to_update.append("view_query")
                     bq_structure.view_query = structure.view_query
 
-            if structure.labels and structure.labels != bq_structure.labels:
+            current_labels = bq_structure.labels or {}
+            if structure.labels != current_labels:
                 fields_to_update.append("labels")
-                bq_structure.labels = structure.labels
+                # BigQuery only removes a label when it is sent with a None value
+                removed = {
+                    key: None for key in current_labels if key not in structure.labels
+                }
+                bq_structure.labels = {**removed, **structure.labels}
 
-            if (
-                structure.description
-                and structure.description != bq_structure.description
-            ):
+            if structure.description != bq_structure.description:
                 fields_to_update.append("description")
                 bq_structure.description = structure.description
 
-            if (
-                structure.clustering
-                and structure.clustering != bq_structure.clustering_fields
-            ):
-                fields_to_update.append("clustering")
-                bq_structure.clustering_fields = structure.clustering  # type: ignore
+            clustering = structure.clustering or None
+            if clustering != (bq_structure.clustering_fields or None):
+                fields_to_update.append("clustering_fields")
+                bq_structure.clustering_fields = clustering
 
             # Skip the API call when nothing changed; BigQuery rate-limits table
             # metadata updates, and deploy pipelines re-apply unchanged definitions.
             if fields_to_update:
-                self.bq_client.update_table(bq_structure, fields_to_update)
+                return self.bq_client.update_table(bq_structure, fields_to_update)
 
             return bq_structure
         except NotFound:
             return self._handle_create_structure(
                 dataset, project, structure_id, structure
             )
+
+    def _update_partitioning(
+        self, bq_structure: Table, partition: Partition | None
+    ) -> bool:
+        """
+        Function checks the definition's partitioning against an existing table.
+
+        BigQuery cannot add, remove or change the partitioning of an existing table, with
+        one exception: a time-partitioned table's partition expiration.
+
+        Args:
+            bq_structure (Table):
+                The existing BigQuery Table. Its partition expiration is updated in place
+                when only the expiration differs.
+            partition (Optional[Partition]):
+                The definition's partitioning.
+
+        Returns:
+            Bool: Whether the partition expiration changed and must be sent as an update.
+
+        Raises:
+            InvalidDefinitionException: If the partitioning differs in any other way.
+        """
+        current_time = bq_structure.time_partitioning
+        current_range = bq_structure.range_partitioning
+
+        def mismatch(detail: str) -> InvalidDefinitionException:
+            return InvalidDefinitionException(
+                f"Cannot change the partitioning of existing table "
+                f"{bq_structure.full_table_id or bq_structure.table_id}: {detail}. "
+                "BigQuery only allows changing the partition expiration in place; "
+                "recreate the table to change anything else."
+            )
+
+        if partition is None:
+            if current_time or current_range:
+                raise mismatch("the table is partitioned but the definition is not")
+            return False
+
+        if partition.type == PartitionType.time:
+            desired_time = self._get_time_partitioned_scheme(partition)
+            if (
+                current_time is None
+                or current_time.type_ != desired_time.type_
+                or current_time.field != desired_time.field
+            ):
+                raise mismatch(
+                    f"the definition has {desired_time.type_} time partitioning on "
+                    f"{desired_time.field or 'ingestion time'}"
+                )
+            if current_time.expiration_ms == desired_time.expiration_ms:
+                return False
+            current_time.expiration_ms = desired_time.expiration_ms
+            bq_structure.time_partitioning = current_time
+            return True
+
+        desired_range = self._get_range_partitioned_scheme(partition)
+        if (
+            current_range is None
+            or current_range.field != desired_range.field
+            or current_range.range_.start != desired_range.range_.start
+            or current_range.range_.end != desired_range.range_.end
+            or current_range.range_.interval != desired_range.range_.interval
+        ):
+            raise mismatch(
+                f"the definition has range partitioning on {desired_range.field}"
+            )
+        return False
 
     @staticmethod
     def _get_structure(json_schema: dict | list[dict]) -> Structure:

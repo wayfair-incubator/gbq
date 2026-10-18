@@ -46,30 +46,28 @@ def get_bq_credentials(credential: str) -> service_account.Credentials:
 def get_bq_schema_from_json_schema(source: list[dict]) -> list[SchemaField]:
     """
     Function coverts json table schema for a BQ table to a list of BQ SchemaField objects.
+
+    Each field is built from its BigQuery API representation, so every attribute in the
+    JSON is kept (e.g. policyTags, precision, scale, maxLength, defaultValueExpression,
+    collation), and nested fields of RECORD and STRUCT columns are converted recursively.
     """
-    # SchemaField list
-    schema: list[SchemaField] = []
+    return [SchemaField.from_api_repr(_with_field_defaults(field)) for field in source]
 
-    for _key, value in enumerate(source):
-        description = value.get("description", None)
-        fields = None
 
-        # If it is a STRUCT / RECORD field we need to recursively process nested fields
-        if value.get("type") == "RECORD":
-            fields = get_bq_schema_from_json_schema(value.get("fields", []))
-
-        schema_field = SchemaField(
-            name=str(value.get("name")),
-            field_type=str(value.get("type")),
-            mode=value.get("mode", "NULLABLE"),
-            description=description if description is not None else "",
-            fields=tuple(fields) if fields else (),
-        )
-
-        # Add the field to the list of fields
-        schema.append(schema_field)
-
-    return schema
+def _with_field_defaults(field: dict) -> dict:
+    """
+    Function returns a copy of a JSON schema field with gbq's defaults applied: mode
+    NULLABLE, an empty description, and the same defaults for nested fields.
+    """
+    resource = dict(field)
+    resource["name"] = str(resource.get("name"))
+    resource["type"] = str(resource.get("type"))
+    resource["mode"] = resource.get("mode") or "NULLABLE"
+    if resource.get("description") is None:
+        resource["description"] = ""
+    if resource.get("fields"):
+        resource["fields"] = [_with_field_defaults(f) for f in resource["fields"]]
+    return resource
 
 
 # Standard SQL type names the API reports under their legacy names
