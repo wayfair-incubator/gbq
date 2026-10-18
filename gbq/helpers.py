@@ -5,6 +5,8 @@ from collections import defaultdict
 from google.cloud.bigquery import SchemaField
 from google.oauth2 import service_account
 
+from gbq.exceptions import InvalidDefinitionException
+
 field_type = {
     str: "STRING",
     bytes: "BYTES",
@@ -150,7 +152,7 @@ def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> list[SchemaField]:
             else:
                 schema_field = SchemaField(key, field_type[type(value)])
         except KeyError:
-            schema_field = _handle_exception(key, schema_field, value)
+            schema_field = _handle_exception(key, value)
 
         # Add the field to the list of fields
         schema.append(schema_field)
@@ -159,13 +161,23 @@ def _map_raw_dictionary_to_bq_schema(raw_data: dict) -> list[SchemaField]:
     return schema
 
 
-def _handle_exception(key, schema_field, value):
-    # We are expecting a REPEATED field
-    if value and len(value) > 0:
-        schema_field = SchemaField(
-            key, field_type[type(value[0])], mode="REPEATED"
-        )  # REPEATED
-    elif isinstance(value, list) and not value:
-        # Managing empty list case
-        schema_field = SchemaField(key, "RECORD", mode="REPEATED")  # REPEATED
-    return schema_field
+def _handle_exception(key, value) -> SchemaField:
+    """
+    Function builds a SchemaField for values whose type is not in field_type:
+        nulls, lists and tuples. Raises InvalidDefinitionException for anything else.
+    """
+    if value is None:
+        # A null carries no type information; STRING is the most permissive choice.
+        return SchemaField(key, "STRING")
+
+    if isinstance(value, list | tuple):
+        if not value:
+            # Managing empty list case
+            return SchemaField(key, "RECORD", mode="REPEATED")
+        if type(value[0]) in field_type:
+            return SchemaField(key, field_type[type(value[0])], mode="REPEATED")
+
+    raise InvalidDefinitionException(
+        f"Cannot infer a BigQuery type for field '{key}' "
+        f"with value of type {type(value).__name__}"
+    )

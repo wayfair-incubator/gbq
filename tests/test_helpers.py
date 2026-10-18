@@ -1,6 +1,9 @@
+from decimal import Decimal
+
 import pytest
 from google.cloud.bigquery import SchemaField
 
+from gbq.exceptions import InvalidDefinitionException
 from gbq.helpers import (
     _check_if_map,
     _map_raw_dictionary_to_bq_schema,
@@ -214,3 +217,31 @@ def test_get_bq_schema_from_raw_data_dictionary_dict():
 
     response = get_bq_schema_from_record(raw_data)
     assert response == expected
+
+
+def test_get_bq_schema_from_raw_data_dictionary_none_value():
+    expected = [
+        SchemaField("request_id", "INTEGER", "NULLABLE"),
+        SchemaField("comment", "STRING", "NULLABLE"),
+    ]
+
+    raw_data = {"request_id": 2, "comment": None}
+
+    response = get_bq_schema_from_record(raw_data)
+    assert response == expected
+
+
+def test_get_bq_schema_from_raw_data_dictionary_only_none_value():
+    response = get_bq_schema_from_record({"comment": None})
+    assert response == [SchemaField("comment", "STRING", "NULLABLE")]
+
+
+def test_get_bq_schema_from_raw_data_dictionary_tuple_of_int():
+    response = get_bq_schema_from_record({"numbers": (1, 2, 3)})
+    assert response == [SchemaField("numbers", "INTEGER", "REPEATED")]
+
+
+@pytest.mark.parametrize("value", [Decimal("1.5"), object(), [object()]])
+def test_get_bq_schema_from_raw_data_dictionary_unsupported_type(value):
+    with pytest.raises(InvalidDefinitionException, match="field 'amount'"):
+        get_bq_schema_from_record({"request_id": 2, "amount": value})

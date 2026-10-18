@@ -15,7 +15,7 @@ from gbq.dto import (
     StructureType,
     TimeDefinition,
 )
-from gbq.exceptions import GbqException
+from gbq.exceptions import GbqException, InvalidDefinitionException
 from tests.fixtures import (
     Routine,
     Table,
@@ -136,7 +136,7 @@ def test_create_or_update_structure_with_incorrect_partition(
     bq, nested_json_schema_with_incorrect_partition, table
 ):
     bq.bq_client.get_table.side_effect = NotFound("")
-    with pytest.raises(KeyError):
+    with pytest.raises(InvalidDefinitionException, match="Invalid TimeType 'ADASD'"):
         bq.create_or_update_structure(
             "project",
             "dataset",
@@ -510,3 +510,57 @@ def test_structure_str_or_list_body():
     input_json = {"body": ["test", "test1", "test2"]}
     expected = Structure(**input_json)
     assert expected.body == "test\ntest1\ntest2"
+
+
+def test_star_import_exports_public_api():
+    namespace: dict = {}
+    exec("from gbq import *", namespace)  # noqa: S102
+    assert namespace["BigQuery"] is BigQuery
+    assert namespace["GbqException"] is GbqException
+    assert namespace["InvalidDefinitionException"] is InvalidDefinitionException
+
+
+def test__get_structure_does_not_mutate_input():
+    partition = {"type": "time", "definition": {"type": "day"}}
+    raw = {"schema": [], "partition": partition, "body": ["a", "b"]}
+
+    structure = BigQuery._get_structure(raw)
+
+    assert structure.partition.definition.type.value == "DAY"
+    assert raw == {"schema": [], "partition": partition, "body": ["a", "b"]}
+    assert partition == {"type": "time", "definition": {"type": "day"}}
+
+
+def test_argument_does_not_mutate_input():
+    raw = {"name": "test", "data_type": "string"}
+    Argument.model_validate(raw)
+    assert raw == {"name": "test", "data_type": "string"}
+
+
+@pytest.mark.parametrize("json_schema", ["not a schema", None, 42])
+def test__get_structure_rejects_unsupported_input(json_schema):
+    with pytest.raises(InvalidDefinitionException, match="must be a dict or a list"):
+        BigQuery._get_structure(json_schema)
+
+
+@pytest.mark.parametrize(
+    "json_schema, message",
+    [
+        (
+            {"partition": {"type": "hourly", "definition": {"type": "DAY"}}},
+            "Invalid PartitionType 'hourly'",
+        ),
+        (
+            {"partition": {"type": "time", "definition": {"type": "weekly"}}},
+            "Invalid TimeType 'WEEKLY'",
+        ),
+        (
+            {"body": "SELECT 1", "arguments": [{"name": "a", "data_type": "nope"}]},
+            "Invalid BigQueryDataType 'NOPE'",
+        ),
+        ({"labels": "not-a-dict"}, "Invalid structure definition"),
+    ],
+)
+def test__get_structure_wraps_validation_errors(json_schema, message):
+    with pytest.raises(InvalidDefinitionException, match=message):
+        BigQuery._get_structure(json_schema)
