@@ -36,6 +36,12 @@ def bq(mocker) -> BigQuery:
     mock_client = mocker.patch("gbq.bigquery.bigquery.Client")
     # Ensure the mock client has a project attribute for QueryJob compatibility
     mock_client.return_value.project = "project"
+    # Existing tables are real, unpartitioned Table objects, and update_table returns
+    # the updated table as the API does
+    mock_client.return_value.get_table.return_value = bigquery.Table(
+        "project.dataset.structure"
+    )
+    mock_client.return_value.update_table.side_effect = lambda table, fields: table
     return BigQuery('{"secret": "secret"}', "project")
 
 
@@ -837,3 +843,178 @@ def test_fetch_rows_passes_project(bq):
 
     _, kwargs = bq.bq_client.query_and_wait.call_args
     assert kwargs["project"] == "billing-project"
+
+
+SCHEMA = [
+    {"name": "id", "type": "INTEGER"},
+    {"name": "ts", "type": "TIMESTAMP"},
+]
+
+
+def make_table(**properties) -> bigquery.Table:
+    table = bigquery.Table("project.dataset.structure")
+    table.schema = [bigquery.SchemaField.from_api_repr(f) for f in SCHEMA]
+    for name, value in properties.items():
+        setattr(table, name, value)
+    return table
+
+
+def test_update_clears_labels_description_and_clustering_omitted_from_definition(bq):
+    table = make_table(
+        labels={"team": "abc", "owner": "me"},
+        description="old",
+        clustering_fields=["id"],
+    )
+    bq.bq_client.get_table.return_value = table
+
+    result = bq.create_or_update_structure(
+        "project", "dataset", "structure", {"schema": SCHEMA, "labels": {"team": "abc"}}
+    )
+
+    bq.bq_client.update_table.assert_called_once_with(
+        table, ["labels", "description", "clustering_fields"]
+    )
+    assert result is table
+    assert table.labels == {"team": "abc", "owner": None}
+    assert table.description is None
+    assert table.clustering_fields is None
+
+
+def test_update_keeps_matching_labels_description_and_clustering(bq):
+    bq.bq_client.get_table.return_value = make_table(
+        labels={"team": "abc"}, description="d", clustering_fields=["id"]
+    )
+
+    bq.create_or_update_structure(
+        "project",
+        "dataset",
+        "structure",
+        {
+            "schema": SCHEMA,
+            "labels": {"team": "abc"},
+            "description": "d",
+            "clustering": ["id"],
+        },
+    )
+
+    bq.bq_client.update_table.assert_not_called()
+
+
+def time_partition(type_="DAY", field="ts", expiration_ms=None):
+    return bigquery.TimePartitioning(
+        type_=type_, field=field, expiration_ms=expiration_ms
+    )
+
+
+def range_partition(field="id", start=0, end=100, interval=10):
+    partitioning = bigquery.RangePartitioning(field=field)
+    partitioning.range_ = PartitionRange(start=start, end=end, interval=interval)
+    return partitioning
+
+
+TIME_DEFINITION = {"type": "time", "definition": {"type": "DAY", "field": "ts"}}
+RANGE_DEFINITION = {
+    "type": "range",
+    "definition": {
+        "field": "id",
+        "range": {"start": 0, "end": 100, "interval": 10},
+    },
+}
+
+
+@pytest.mark.parametrize(
+    "properties, partition",
+    [
+        ({"time_partitioning": time_partition()}, TIME_DEFINITION),
+        ({"range_partitioning": range_partition()}, RANGE_DEFINITION),
+        ({}, None),
+    ],
+)
+def test_update_accepts_unchanged_partitioning(bq, properties, partition):
+    bq.bq_client.get_table.return_value = make_table(**properties)
+    definition = {"schema": SCHEMA, "partition": partition}
+
+    bq.create_or_update_structure("project", "dataset", "structure", definition)
+
+    bq.bq_client.update_table.assert_not_called()
+
+
+def test_update_changes_partition_expiration(bq):
+    table = make_table(time_partitioning=time_partition(expiration_ms=1000))
+    bq.bq_client.get_table.return_value = table
+    partition = {
+        "type": "time",
+        "definition": {"type": "DAY", "field": "ts", "expirationMs": "86400000"},
+    }
+
+    bq.create_or_update_structure(
+        "project", "dataset", "structure", {"schema": SCHEMA, "partition": partition}
+    )
+
+    bq.bq_client.update_table.assert_called_once_with(table, ["time_partitioning"])
+    assert table.time_partitioning.expiration_ms == 86400000
+    assert table.time_partitioning.field == "ts"
+
+
+@pytest.mark.parametrize(
+    "properties, partition, message",
+    [
+        ({}, TIME_DEFINITION, "DAY time partitioning on ts"),
+        (
+            {"time_partitioning": time_partition(type_="HOUR")},
+            TIME_DEFINITION,
+            "DAY time partitioning",
+        ),
+        (
+            {"time_partitioning": time_partition(field="other")},
+            TIME_DEFINITION,
+            "time partitioning on ts",
+        ),
+        (
+            {"time_partitioning": time_partition()},
+            {"type": "time", "definition": {"type": "DAY"}},
+            "on ingestion time",
+        ),
+        ({"time_partitioning": time_partition()}, None, "definition is not"),
+        ({"range_partitioning": range_partition()}, None, "definition is not"),
+        ({"time_partitioning": time_partition()}, RANGE_DEFINITION, "range"),
+        (
+            {"range_partitioning": range_partition(interval=5)},
+            RANGE_DEFINITION,
+            "range",
+        ),
+        (
+            {"range_partitioning": range_partition(field="ts")},
+            RANGE_DEFINITION,
+            "range",
+        ),
+    ],
+)
+def test_update_rejects_partitioning_changes(bq, properties, partition, message):
+    bq.bq_client.get_table.return_value = make_table(**properties)
+    definition = {"schema": SCHEMA, "partition": partition}
+
+    with pytest.raises(InvalidDefinitionException, match=message) as exc_info:
+        bq.create_or_update_structure("project", "dataset", "structure", definition)
+
+    assert "Cannot change the partitioning of existing table" in str(exc_info.value)
+    bq.bq_client.update_table.assert_not_called()
+
+
+def test_update_keeps_policy_tags_and_precision(bq):
+    field = {
+        "name": "amount",
+        "type": "NUMERIC",
+        "precision": "10",
+        "scale": "2",
+        "policyTags": {"names": ["projects/p/locations/us/taxonomies/1/policyTags/2"]},
+    }
+    table = bigquery.Table("project.dataset.structure")
+    table.schema = [bigquery.SchemaField.from_api_repr(field)]
+    bq.bq_client.get_table.return_value = table
+
+    bq.create_or_update_structure("project", "dataset", "structure", [field])
+
+    # Previously the definition lost these attributes, so the schema always differed
+    # and the update stripped the column's policy tags
+    bq.bq_client.update_table.assert_not_called()

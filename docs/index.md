@@ -32,6 +32,20 @@ bq = BigQuery(project=project_id)
 bq.create_or_update_structure(project_id, dataset_id, structure_id, json_schema)
 ```
 
+### Updating Existing Tables
+
+`create_or_update_structure` creates the structure if it doesn't exist. Otherwise it
+updates it to match the definition, and skips the API call when nothing changed:
+
+* The definition is the source of truth. Labels, description and clustering that the
+  definition omits are removed from the existing table or view.
+* Schema fields keep every attribute in the definition, such as `policyTags`,
+  `precision` and `maxLength`.
+* BigQuery cannot change an existing table's partitioning, except a time partition's
+  expiration. If the definition's partitioning differs in any other way,
+  `InvalidDefinitionException` is raised and the table is left unchanged; recreate the
+  table to change it.
+
 ### Authentication
 
 `BigQuery` uses [Application Default Credentials][adc] unless you pass credentials explicitly.

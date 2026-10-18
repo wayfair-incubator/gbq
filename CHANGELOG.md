@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Python 3.10, which reached end of life on 2026-10-01
 
 ### Changed
+- When `create_or_update_structure()` updates an existing table or view, the definition
+  is now the source of truth: labels, description and clustering that the definition
+  omits are removed. Previously they could be set but never cleared
+- Updating an existing table whose partitioning differs from the definition now raises
+  `InvalidDefinitionException` instead of silently ignoring the partitioning. A changed
+  time partition expiration is applied, since BigQuery allows that in place
 - Methods that take a `project` argument no longer change the client's default project
   as a side effect. Previously, `execute()` ran its job in whichever project the last
   such call used; it now runs in the project `BigQuery` was created with, or in the
@@ -52,6 +58,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (a definition that is not a dict or list)
 
 ### Fixed
+- Schema conversion kept only name, type, mode, description and nested fields, dropping
+  attributes such as `policyTags`, `precision`, `scale`, `maxLength` and
+  `defaultValueExpression`. Updates therefore always rewrote the schema and stripped
+  policy tags set on columns. All attributes are now kept, and `STRUCT` columns get their
+  nested fields like `RECORD` columns
 - `get_table_in_project()` is annotated as returning `TableListItem` objects, which is
   what it has always returned, instead of `Table`
 - `from gbq import *` raised `TypeError`; `__all__` now lists `BigQuery`, `GbqException`
