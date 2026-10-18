@@ -136,9 +136,6 @@ search_format_pattern = """name = "gbq"
 version = "{version}\""""
 
 [[tool.hyper-bump-it.files]]
-file_glob = "gbq/__init__.py"
-
-[[tool.hyper-bump-it.files]]
 file_glob = "docs/index.md"
 search_format_pattern = "GBQ - {version}"
 

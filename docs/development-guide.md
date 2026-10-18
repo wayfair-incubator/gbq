@@ -99,29 +99,32 @@ Renovate also opens a weekly lock file maintenance pull request that does this.
 
 ## Publishing a New Version
 
-Once the package is ready to be released, there are a few things that need to be done:
+Releases are made by merging a version bump pull request created with [hyper-bump-it][hyper-bump-it]. The version
+lives in `pyproject.toml`; `gbq.__version__` is read from the installed package's metadata.
 
 1. Start with a local clone of the repo on the default branch with a clean working tree.
 2. Have [uv][uv-docs] installed.
-3. Perform the version bump part name (`major`, `minor`, or `patch`).
-    Example: `uv run hyper-bump-it by minor`
+3. Bump the version by part (`major`, `minor`, or `patch`), for example:
 
-    This wil create a new branch, updates all affected files with the new version, commit the changes to the branch, and 
-    push the branch.
-4. Create a new pull request for the pushed branch.
-5. Get the pull request approved.
-6. Merge the pull request to the default branch.
+    ```bash
+    uv run hyper-bump-it by minor
+    ```
 
-Merging the pull request will trigger a GitHub Action that will create a new release. The creation of this new
-release will trigger a GitHub Action that will to build a wheel & a source distributions of the package and push them to
-[PyPI][pypi].
+    This updates the version in `pyproject.toml`, `uv.lock` and `docs/index.md`, adds a heading for it to
+    `CHANGELOG.md`, then commits to a new `bump_version_to_<version>` branch and pushes it.
+4. Create a pull request for the pushed branch, keeping the `Bump version: <old> → <new>` title.
+5. Get the pull request approved and merge it.
+
+Merging the pull request triggers the `Version Bump merged` workflow, which creates the GitHub release. The release
+triggers the `Publish Release` workflow, which builds the wheel and source distribution, publishes them to
+[PyPI][pypi], and publishes the documentation for the new version. A full release becomes the documentation's
+`latest` version.
+
+Don't create releases by hand: the files above would not be updated.
 
 !!! warning
-    The action that uploads the files to PyPI will not run until a repository maintainer acknowledges that the job is
-    ready to run. This is to keep the PyPI publishing token secure. Otherwise, any job would have access to the token. 
-
-In addition to uploading the files to PyPI, the documentation website will be updated to include the new version. If the
-new version is a full release, it will be made the new `latest` version.
+    The job that uploads to PyPI uses [trusted publishing][trusted-publishing] and runs in the `Publish Release`
+    environment, so it waits until a repository maintainer approves it.
 
 ## Continuous Integration Pipeline
 
@@ -167,3 +170,5 @@ The pipeline runs the tests cases across each supported version of Python to ens
 [hatchling]: https://hatch.pypa.io/latest/
 [pypi]: https://pypi.org/project/gbq/
 [codecov]: https://about.codecov.io/
+[hyper-bump-it]: https://github.com/plannigan/hyper-bump-it
+[trusted-publishing]: https://docs.pypi.org/trusted-publishers/
