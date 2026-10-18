@@ -296,6 +296,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -444,6 +472,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -506,14 +562,44 @@
 <span class="n">structure_id</span> <span class="o">=</span> <span class="s1">'structure_id'</span>
 
 <span class="c1"># BigQuery structure definition as defined in the Google Developers Console.</span>
-<span class="n">json_schema</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"table"</span><span class="p">,</span> <span class="s2">"schema"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"integer"</span><span class="p">}]}</span>
+<span class="n">json_schema</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"table"</span><span class="p">,</span>
+    <span class="s2">"schema"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"id"</span><span class="p">,</span> <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"INTEGER"</span><span class="p">,</span> <span class="s2">"mode"</span><span class="p">:</span> <span class="s2">"REQUIRED"</span><span class="p">}],</span>
+<span class="p">}</span>
 
-<span class="c1"># Service account email address as listed in the Google Developers Console.</span>
-<span class="n">svc_account</span> <span class="o">=</span> <span class="s1">'{"type": "service_account",   "project_id": "project_id"}'</span>
-
-<span class="n">bq</span> <span class="o">=</span> <span class="n">BigQuery</span><span class="p">(</span><span class="n">svc_account</span><span class="o">=</span><span class="n">svc_account</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+<span class="c1"># Authenticates with Application Default Credentials: Workload Identity, an attached</span>
+<span class="c1"># service account, GOOGLE_APPLICATION_CREDENTIALS, or `gcloud auth application-default login`.</span>
+<span class="n">bq</span> <span class="o">=</span> <span class="n">BigQuery</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
 
 <span class="n">bq</span><span class="o">.</span><span class="n">create_or_update_structure</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">structure_id</span><span class="p">,</span> <span class="n">json_schema</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="authentication">Authentication</h3>
+<p><code>BigQuery</code> uses <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a> unless you pass credentials explicitly.
+Prefer this, or a <code>google.auth</code> credentials object, over long-lived service account keys:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">google.auth</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">impersonated_credentials</span>
+
+<span class="n">source</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">google</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+<span class="n">credentials</span> <span class="o">=</span> <span class="n">impersonated_credentials</span><span class="o">.</span><span class="n">Credentials</span><span class="p">(</span>
+    <span class="n">source_credentials</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">target_principal</span><span class="o">=</span><span class="s2">"deployer@project_id.iam.gserviceaccount.com"</span><span class="p">,</span>
+    <span class="n">target_scopes</span><span class="o">=</span><span class="p">[</span><span class="s2">"https://www.googleapis.com/auth/bigquery"</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">bq</span> <span class="o">=</span> <span class="n">BigQuery</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span> <span class="n">credentials</span><span class="o">=</span><span class="n">credentials</span><span class="p">)</span>
+
+<span class="c1"># A service account key as a JSON string is still supported</span>
+<span class="n">bq</span> <span class="o">=</span> <span class="n">BigQuery</span><span class="p">(</span><span class="n">svc_account</span><span class="o">=</span><span class="n">key_json</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project_id</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="running-queries">Running Queries</h3>
+<p>Pass values as query parameters instead of formatting them into the SQL string, so they
+can't change the query (SQL injection):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">google.cloud</span><span class="w"> </span><span class="kn">import</span> <span class="n">bigquery</span>
+
+<span class="n">job</span> <span class="o">=</span> <span class="n">bq</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+    <span class="s2">"SELECT * FROM `project_id.dataset_id.users` WHERE name = @name"</span><span class="p">,</span>
+    <span class="n">query_parameters</span><span class="o">=</span><span class="p">[</span><span class="n">bigquery</span><span class="o">.</span><span class="n">ScalarQueryParameter</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"STRING"</span><span class="p">,</span> <span class="n">user_input</span><span class="p">)],</span>
+<span class="p">)</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
 </code></pre></div>
 <h2 id="where-to-start">Where to Start?</h2>
 <p>To learn the basics of how to start using <code>gbq</code>, read the <a href="getting-started/">Getting Started</a> page.</p>
