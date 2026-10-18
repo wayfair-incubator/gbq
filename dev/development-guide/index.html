@@ -759,30 +759,31 @@ docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w
 <p>To upgrade every locked dependency to its latest allowed version, run <code>docker compose run --rm lock --upgrade</code>.
 Renovate also opens a weekly lock file maintenance pull request that does this.</p>
 <h2 id="publishing-a-new-version">Publishing a New Version</h2>
-<p>Once the package is ready to be released, there are a few things that need to be done:</p>
+<p>Releases are made by merging a version bump pull request created with <a href="https://github.com/plannigan/hyper-bump-it">hyper-bump-it</a>. The version
+lives in <code>pyproject.toml</code>; <code>gbq.__version__</code> is read from the installed package's metadata.</p>
 <ol>
 <li>Start with a local clone of the repo on the default branch with a clean working tree.</li>
 <li>Have <a href="https://docs.astral.sh/uv/">uv</a> installed.</li>
 <li>
-<p>Perform the version bump part name (<code>major</code>, <code>minor</code>, or <code>patch</code>).
-    Example: <code>uv run hyper-bump-it by minor</code></p>
-<p>This wil create a new branch, updates all affected files with the new version, commit the changes to the branch, and 
-push the branch.
-4. Create a new pull request for the pushed branch.
-5. Get the pull request approved.
-6. Merge the pull request to the default branch.</p>
+<p>Bump the version by part (<code>major</code>, <code>minor</code>, or <code>patch</code>), for example:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>hyper-bump-it<span class="w"> </span>by<span class="w"> </span>minor
+</code></pre></div>
+<p>This updates the version in <code>pyproject.toml</code>, <code>uv.lock</code> and <code>docs/index.md</code>, adds a heading for it to
+<code>CHANGELOG.md</code>, then commits to a new <code>bump_version_to_&lt;version&gt;</code> branch and pushes it.
+4. Create a pull request for the pushed branch, keeping the <code>Bump version: &lt;old&gt; → &lt;new&gt;</code> title.
+5. Get the pull request approved and merge it.</p>
 </li>
 </ol>
-<p>Merging the pull request will trigger a GitHub Action that will create a new release. The creation of this new
-release will trigger a GitHub Action that will to build a wheel &amp; a source distributions of the package and push them to
-<a href="https://pypi.org/project/gbq/">PyPI</a>.</p>
+<p>Merging the pull request triggers the <code>Version Bump merged</code> workflow, which creates the GitHub release. The release
+triggers the <code>Publish Release</code> workflow, which builds the wheel and source distribution, publishes them to
+<a href="https://pypi.org/project/gbq/">PyPI</a>, and publishes the documentation for the new version. A full release becomes the documentation's
+<code>latest</code> version.</p>
+<p>Don't create releases by hand: the files above would not be updated.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The action that uploads the files to PyPI will not run until a repository maintainer acknowledges that the job is
-ready to run. This is to keep the PyPI publishing token secure. Otherwise, any job would have access to the token. </p>
+<p>The job that uploads to PyPI uses <a href="https://docs.pypi.org/trusted-publishers/">trusted publishing</a> and runs in the <code>Publish Release</code>
+environment, so it waits until a repository maintainer approves it.</p>
 </div>
-<p>In addition to uploading the files to PyPI, the documentation website will be updated to include the new version. If the
-new version is a full release, it will be made the new <code>latest</code> version.</p>
 <h2 id="continuous-integration-pipeline">Continuous Integration Pipeline</h2>
 <p>The Continuous Integration (CI) Pipeline runs to confirm that the repository is in a good state. It will run when 
 someone creates a pull request or when they push new commits to the branch for an existing pull request. The pipeline
