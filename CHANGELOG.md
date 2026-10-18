@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Python 3.10, which reached end of life on 2026-10-01
 
 ### Changed
+- Methods that take a `project` argument no longer change the client's default project
+  as a side effect. Previously, `execute()` ran its job in whichever project the last
+  such call used; it now runs in the project `BigQuery` was created with, or in the
+  project passed with the new `project=` argument (also on `fetch_rows()`)
 - Upgraded `pydantic` to 2.14.1 and `google-crc32c` to 1.9.0, which ship Python
   3.15 wheels
 - Development dependencies moved from `requirements*.txt` and `requirements.lock` to

@@ -97,7 +97,6 @@ class BigQuery:
         Returns:
             List[DatasetListItem]: A list of object of BigQuery DatasetListItem.
         """
-        self.bq_client.project = project
         datasets: list[DatasetListItem] = list(
             self.bq_client.list_datasets(project=project)
         )
@@ -123,8 +122,6 @@ class BigQuery:
         Returns:
             Bool: Whether dataset was deleted or not.
         """
-        self.bq_client.project = project
-
         try:
             self.bq_client.delete_dataset(
                 f"{project}.{dataset}", delete_contents=delete_contents
@@ -154,7 +151,6 @@ class BigQuery:
             List[TableListItem]: A list of object of BigQuery TableListItem, grouped by
                 dataset in the order the datasets are listed.
         """
-        self.bq_client.project = project
         datasets: list[DatasetListItem] = self.get_dataset_in_project(project)
         if not datasets:
             return []
@@ -185,7 +181,6 @@ class BigQuery:
         Returns:
             Table: An object of BigQuery Table.
         """
-        self.bq_client.project = project
         full_table_name = f"{project}.{dataset}.{structure}"
         bq_table: Table = self.bq_client.get_table(full_table_name)
         return bq_table
@@ -205,8 +200,6 @@ class BigQuery:
         Returns:
             Bool: Whether table or view was deleted or not.
         """
-        self.bq_client.project = project
-
         try:
             self.bq_client.delete_table(f"{project}.{dataset}.{structure}")
         except NotFound:
@@ -230,7 +223,6 @@ class BigQuery:
         Returns:
             Routine: An object of BigQuery Routine.
         """
-        self.bq_client.project = project
         routine_id = f"{project}.{dataset}.{routine_name}"
         routine: Routine = self.bq_client.get_routine(routine_id)
         return routine
@@ -300,8 +292,6 @@ class BigQuery:
         Returns:
             Table: An object of BigQuery Table.
         """
-        self.bq_client.project = project
-
         structure = self._get_structure(json_schema)
 
         if (
@@ -481,7 +471,6 @@ class BigQuery:
         Returns:
             Routine: An object of BigQuery Routine.
         """
-        self.bq_client.project = project
         routine_id = f"{project}.{dataset}.{structure_id}"
 
         try:
@@ -613,6 +602,8 @@ class BigQuery:
         query: str,
         query_parameters: Sequence[QueryParameter] | None = None,
         job_config: QueryJobConfig | None = None,
+        *,
+        project: str | None = None,
     ) -> QueryJob:
         """
         Function return a QueryJob object after executing a SQL statement
@@ -629,6 +620,10 @@ class BigQuery:
             job_config (Optional[QueryJobConfig]):
                 Extra job settings such as labels, dry_run or maximum_bytes_billed. It is
                 not modified; query_parameters replace any parameters it already has.
+            project (Optional[str]):
+                Project to run (and bill) the query job in. Defaults to the project the
+                BigQuery object was created with. Tables in other projects can still be
+                queried by their fully qualified names.
 
         Examples:
             bq.execute(
@@ -645,7 +640,9 @@ class BigQuery:
         job_config = self._build_job_config(query_parameters, job_config)
 
         try:
-            query_job = self.bq_client.query(query, job_config=job_config)
+            query_job = self.bq_client.query(
+                query, job_config=job_config, project=project
+            )
 
             # Wait for query job to finish.
             query_job.result()
@@ -660,6 +657,8 @@ class BigQuery:
         query_parameters: Sequence[QueryParameter] | None = None,
         job_config: QueryJobConfig | None = None,
         max_results: int | None = None,
+        *,
+        project: str | None = None,
     ) -> RowIterator:
         """
         Function runs a SQL statement and returns its rows.
@@ -678,6 +677,8 @@ class BigQuery:
                 Extra job settings; see execute(). It is not modified.
             max_results (Optional[int]):
                 Maximum number of rows to return.
+            project (Optional[str]):
+                Project to run (and bill) the query in; see execute().
 
         Returns:
             RowIterator: The query's rows.
@@ -686,7 +687,7 @@ class BigQuery:
 
         try:
             return self.bq_client.query_and_wait(
-                query, job_config=job_config, max_results=max_results
+                query, job_config=job_config, max_results=max_results, project=project
             )
         except Exception as e:
             raise GbqException(str(e)) from e

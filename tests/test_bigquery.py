@@ -642,7 +642,9 @@ def test_execute_without_parameters_passes_job_config_through(bq):
 
     bq.execute("SELECT 1", job_config=job_config)
 
-    bq.bq_client.query.assert_called_once_with("SELECT 1", job_config=job_config)
+    bq.bq_client.query.assert_called_once_with(
+        "SELECT 1", job_config=job_config, project=None
+    )
 
 
 def test_execute_with_query_parameters(bq):
@@ -795,3 +797,43 @@ def test_fetch_rows_raise_exception(bq):
 
     with pytest.raises(GbqException, match="boom"):
         bq.fetch_rows("SELECT 1")
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        lambda bq: bq.get_dataset_in_project("other"),
+        lambda bq: bq.get_table_in_project("other"),
+        lambda bq: bq.delete_dataset("other", "dataset"),
+        lambda bq: bq.get_structure("other", "dataset", "table"),
+        lambda bq: bq.delete_table_or_view("other", "dataset", "table"),
+        lambda bq: bq.get_routine("other", "dataset", "routine"),
+        lambda bq: bq.create_or_update_structure(
+            "other", "dataset", "table", [{"name": "id", "type": "INTEGER"}]
+        ),
+        lambda bq: bq.create_or_update_structure(
+            "other", "dataset", "procedure", {"body": "SELECT 1"}
+        ),
+    ],
+)
+def test_methods_do_not_change_client_project(bq, call):
+    bq.bq_client.list_datasets.return_value = []
+    bq.bq_client.project = "home"
+
+    call(bq)
+
+    assert bq.bq_client.project == "home"
+
+
+def test_execute_passes_project(bq):
+    bq.execute("SELECT 1", project="billing-project")
+
+    _, kwargs = bq.bq_client.query.call_args
+    assert kwargs["project"] == "billing-project"
+
+
+def test_fetch_rows_passes_project(bq):
+    bq.fetch_rows("SELECT 1", project="billing-project")
+
+    _, kwargs = bq.bq_client.query_and_wait.call_args
+    assert kwargs["project"] == "billing-project"
