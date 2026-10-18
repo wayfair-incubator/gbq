@@ -467,7 +467,7 @@ def test_delete_dataset(bq):
     assert response
     bq.bq_client.get_dataset.assert_not_called()
     bq.bq_client.delete_dataset.assert_called_once_with(
-        "project.dataset", delete_contents=True
+        "project.dataset", delete_contents=False
     )
 
 
@@ -637,11 +637,11 @@ def test_delete_dataset_passes_delete_contents(bq, delete_contents):
     )
 
 
-def test_delete_dataset_deletes_contents_by_default(bq):
+def test_delete_dataset_keeps_contents_by_default(bq):
     bq.delete_dataset("project", "dataset")
 
     _, kwargs = bq.bq_client.delete_dataset.call_args
-    assert kwargs["delete_contents"] is True
+    assert kwargs["delete_contents"] is False
 
 
 def test_execute_without_parameters_passes_job_config_through(bq):

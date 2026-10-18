@@ -104,7 +104,7 @@ class BigQuery:
         return datasets
 
     def delete_dataset(
-        self, project: str, dataset: str, *, delete_contents: bool = True
+        self, project: str, dataset: str, *, delete_contents: bool = False
     ) -> bool:
         """
         Function deletes a dataset.
@@ -115,10 +115,9 @@ class BigQuery:
             dataset (str):
                 ID of dataset containing the table.
             delete_contents (bool):
-                Also delete every table, view and routine in the dataset. Pass False to
-                only delete an empty dataset; BigQuery then rejects deleting a non-empty
-                one. Defaults to True, which will change to False in the next major
-                release.
+                Also delete every table, view and routine in the dataset. By default
+                only an empty dataset is deleted, and BigQuery rejects deleting a
+                non-empty one.
 
         Returns:
             Bool: Whether dataset was deleted or not.
