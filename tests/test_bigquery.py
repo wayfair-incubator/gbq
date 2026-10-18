@@ -455,25 +455,31 @@ def test__handle_stored_procedure_update(bq, routine, routine_structure):
 
 
 def test_delete_dataset(bq):
-    bq.bq_client.get_dataset.return_value = True
     response = bq.delete_dataset("project", "dataset")
+
     assert response
+    bq.bq_client.get_dataset.assert_not_called()
+    bq.bq_client.delete_dataset.assert_called_once_with(
+        "project.dataset", delete_contents=True
+    )
 
 
 def test_delete_dataset_when_not_exists(bq):
-    bq.bq_client.get_dataset.side_effect = NotFound("")
+    bq.bq_client.delete_dataset.side_effect = NotFound("")
     response = bq.delete_dataset("project", "dataset")
     assert not response
 
 
 def test_delete_table_or_view(bq):
-    bq.bq_client.get_table.return_value = True
     response = bq.delete_table_or_view("project", "dataset", "table")
+
     assert response
+    bq.bq_client.get_table.assert_not_called()
+    bq.bq_client.delete_table.assert_called_once_with("project.dataset.table")
 
 
 def test_delete_table_or_view_when_not_exists(bq):
-    bq.bq_client.get_table.side_effect = NotFound("")
+    bq.bq_client.delete_table.side_effect = NotFound("")
     response = bq.delete_table_or_view("project", "dataset", "table")
     assert not response
 
@@ -617,13 +623,10 @@ def test_create_bigquery_rejects_svc_account_and_credentials(mocker):
 
 @pytest.mark.parametrize("delete_contents", [True, False])
 def test_delete_dataset_passes_delete_contents(bq, delete_contents):
-    dataset = object()
-    bq.bq_client.get_dataset.return_value = dataset
-
     assert bq.delete_dataset("project", "dataset", delete_contents=delete_contents)
 
     bq.bq_client.delete_dataset.assert_called_once_with(
-        dataset, delete_contents=delete_contents
+        "project.dataset", delete_contents=delete_contents
     )
 
 
@@ -663,3 +666,119 @@ def test_execute_with_query_parameters_does_not_modify_job_config(bq):
     assert sent.query_parameters == [parameter]
     assert sent.labels == {"team": "abc"}
     assert job_config.query_parameters == []
+
+
+def test_get_dataset_in_project_passes_project(bq, dataset_list_items):
+    bq.bq_client.list_datasets.return_value = dataset_list_items
+
+    bq.get_dataset_in_project("other-project")
+
+    bq.bq_client.list_datasets.assert_called_once_with(project="other-project")
+
+
+def test_get_table_in_project_keeps_dataset_order(bq, dataset_list_items, tables):
+    abc, def_ = tables
+    by_dataset = {"project.abc": iter([abc]), "project.def": iter([def_, def_])}
+    bq.bq_client.list_datasets.return_value = dataset_list_items
+    bq.bq_client.list_tables.side_effect = lambda ref: by_dataset[ref]
+
+    response = bq.get_table_in_project("project", max_workers=2)
+
+    assert response == [abc, def_, def_]
+    assert bq.bq_client.list_tables.call_count == 2
+
+
+def test_get_table_in_project_without_datasets(bq):
+    bq.bq_client.list_datasets.return_value = []
+
+    assert bq.get_table_in_project("project") == []
+    bq.bq_client.list_tables.assert_not_called()
+
+
+@pytest.fixture()
+def existing_table() -> bigquery.Table:
+    table = bigquery.Table("project.dataset.structure")
+    table.schema = [
+        # As returned by the API: no description, standard SQL type alias
+        bigquery.SchemaField.from_api_repr({"name": "id", "type": "INT64"}),
+        bigquery.SchemaField.from_api_repr(
+            {"name": "name", "type": "STRING", "mode": "REQUIRED"}
+        ),
+    ]
+    return table
+
+
+@pytest.fixture()
+def same_schema() -> list[dict]:
+    return [
+        {"name": "id", "type": "INTEGER", "mode": "NULLABLE"},
+        {"name": "name", "type": "STRING", "mode": "REQUIRED"},
+    ]
+
+
+def test_update_table_skipped_when_unchanged(bq, existing_table, same_schema):
+    bq.bq_client.get_table.return_value = existing_table
+
+    result = bq.create_or_update_structure(
+        "project", "dataset", "structure", same_schema
+    )
+
+    assert result is existing_table
+    bq.bq_client.update_table.assert_not_called()
+    bq.bq_client.create_table.assert_not_called()
+
+
+def test_update_table_sends_only_changed_fields(bq, existing_table, same_schema):
+    bq.bq_client.get_table.return_value = existing_table
+
+    bq.create_or_update_structure(
+        "project",
+        "dataset",
+        "structure",
+        {"schema": same_schema, "labels": {"team": "abc"}},
+    )
+
+    bq.bq_client.update_table.assert_called_once_with(existing_table, ["labels"])
+
+
+def test_update_table_sends_changed_schema(bq, existing_table, same_schema):
+    bq.bq_client.get_table.return_value = existing_table
+    new_schema = [*same_schema, {"name": "email", "type": "STRING"}]
+
+    bq.create_or_update_structure("project", "dataset", "structure", new_schema)
+
+    bq.bq_client.update_table.assert_called_once_with(existing_table, ["schema"])
+    assert [field.name for field in existing_table.schema] == ["id", "name", "email"]
+
+
+def test_update_view_skipped_when_query_unchanged(bq):
+    view = bigquery.Table("project.dataset.view")
+    view.view_query = "SELECT 1"
+    bq.bq_client.get_table.return_value = view
+
+    bq.create_or_update_structure(
+        "project", "dataset", "view", {"view_query": "SELECT 1"}
+    )
+
+    bq.bq_client.update_table.assert_not_called()
+
+
+def test_fetch_rows_uses_query_and_wait(bq, mocker):
+    rows = mocker.Mock()
+    bq.bq_client.query_and_wait.return_value = rows
+    parameter = bigquery.ScalarQueryParameter("id", "INT64", 1)
+
+    result = bq.fetch_rows("SELECT @id", query_parameters=[parameter], max_results=5)
+
+    assert result is rows
+    bq.bq_client.query.assert_not_called()
+    _, kwargs = bq.bq_client.query_and_wait.call_args
+    assert kwargs["max_results"] == 5
+    assert kwargs["job_config"].query_parameters == [parameter]
+
+
+def test_fetch_rows_raise_exception(bq):
+    bq.bq_client.query_and_wait.side_effect = TypeError("boom")
+
+    with pytest.raises(GbqException, match="boom"):
+        bq.fetch_rows("SELECT 1")

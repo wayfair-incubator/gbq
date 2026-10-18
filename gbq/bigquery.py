@@ -1,5 +1,6 @@
 import copy
 from collections.abc import Sequence
+from concurrent.futures import ThreadPoolExecutor
 
 from google.api_core.exceptions import NotFound
 from google.auth.credentials import Credentials
@@ -14,7 +15,12 @@ from google.cloud.bigquery import (
 )
 from google.cloud.bigquery.dataset import DatasetListItem
 from google.cloud.bigquery.routine import Routine, RoutineArgument
-from google.cloud.bigquery.table import PartitionRange, Table
+from google.cloud.bigquery.table import (
+    PartitionRange,
+    RowIterator,
+    Table,
+    TableListItem,
+)
 from pydantic import ValidationError
 
 from gbq.dto import (
@@ -26,7 +32,11 @@ from gbq.dto import (
     TimeDefinition,
 )
 from gbq.exceptions import GbqException, InvalidDefinitionException
-from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
+from gbq.helpers import (
+    get_bq_credentials,
+    get_bq_schema_from_json_schema,
+    schemas_equal,
+)
 
 QueryParameter = (
     ScalarQueryParameter
@@ -88,7 +98,9 @@ class BigQuery:
             List[DatasetListItem]: A list of object of BigQuery DatasetListItem.
         """
         self.bq_client.project = project
-        datasets: list[DatasetListItem] = list(self.bq_client.list_datasets())
+        datasets: list[DatasetListItem] = list(
+            self.bq_client.list_datasets(project=project)
+        )
         return datasets
 
     def delete_dataset(
@@ -114,33 +126,49 @@ class BigQuery:
         self.bq_client.project = project
 
         try:
-            bq_structure = self.bq_client.get_dataset(dataset)
-            self.bq_client.delete_dataset(bq_structure, delete_contents=delete_contents)
+            self.bq_client.delete_dataset(
+                f"{project}.{dataset}", delete_contents=delete_contents
+            )
         except NotFound:
             return False
 
         return True
 
-    def get_table_in_project(self, project: str) -> list[Table]:
+    def get_table_in_project(
+        self, project: str, max_workers: int = 8
+    ) -> list[TableListItem]:
         """
-        Function returns list of Table objects of all the tables and views in a project.
+        Function returns list of TableListItem objects of all the tables and views in a project.
+
+        Tables are listed for up to `max_workers` datasets concurrently, instead of one
+        dataset at a time, so a project with many datasets takes a fraction of the time.
 
         Args:
             project (str):
                 Project bound to the operation.
+            max_workers (int):
+                Maximum number of datasets to list tables for at once. The default stays
+                below the HTTP connection pool size of the underlying client.
 
         Returns:
-            List[Table]: A list of object of BigQuery Table.
+            List[TableListItem]: A list of object of BigQuery TableListItem, grouped by
+                dataset in the order the datasets are listed.
         """
-        tables: list[Table] = []
         self.bq_client.project = project
         datasets: list[DatasetListItem] = self.get_dataset_in_project(project)
-        for dataset in datasets:
-            tables_in_dataset = self.bq_client.list_tables(
-                f"{dataset.project}.{dataset.dataset_id}"
+        if not datasets:
+            return []
+
+        def list_tables(dataset: DatasetListItem) -> list[TableListItem]:
+            # list() pages through the results inside the worker thread
+            return list(
+                self.bq_client.list_tables(f"{dataset.project}.{dataset.dataset_id}")
             )
-            [tables.append(table) for table in tables_in_dataset]  # type: ignore
-        return tables
+
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(datasets))) as pool:
+            tables_per_dataset = pool.map(list_tables, datasets)
+
+        return [table for tables in tables_per_dataset for table in tables]
 
     def get_structure(self, project: str, dataset: str, structure: str) -> Table:
         """
@@ -180,8 +208,7 @@ class BigQuery:
         self.bq_client.project = project
 
         try:
-            bq_structure = self.get_structure(project, dataset, structure)
-            self.bq_client.delete_table(bq_structure)
+            self.bq_client.delete_table(f"{project}.{dataset}.{structure}")
         except NotFound:
             return False
 
@@ -314,12 +341,14 @@ class BigQuery:
             bq_structure = self.get_structure(project, dataset, structure_id)
 
             if structure.type == StructureType.table:
-                fields_to_update.append("schema")
                 schema = get_bq_schema_from_json_schema(structure.table_schema)
-                bq_structure.schema = schema
+                if not schemas_equal(schema, list(bq_structure.schema)):
+                    fields_to_update.append("schema")
+                    bq_structure.schema = schema
             elif structure.type == StructureType.view:
-                fields_to_update.append("view_query")
-                bq_structure.view_query = structure.view_query
+                if structure.view_query != bq_structure.view_query:
+                    fields_to_update.append("view_query")
+                    bq_structure.view_query = structure.view_query
 
             if structure.labels and structure.labels != bq_structure.labels:
                 fields_to_update.append("labels")
@@ -339,7 +368,10 @@ class BigQuery:
                 fields_to_update.append("clustering")
                 bq_structure.clustering_fields = structure.clustering  # type: ignore
 
-            self.bq_client.update_table(bq_structure, fields_to_update)
+            # Skip the API call when nothing changed; BigQuery rate-limits table
+            # metadata updates, and deploy pipelines re-apply unchanged definitions.
+            if fields_to_update:
+                self.bq_client.update_table(bq_structure, fields_to_update)
 
             return bq_structure
         except NotFound:
@@ -610,10 +642,7 @@ class BigQuery:
             QueryJob
                 An object of QueryJob.
         """
-        if query_parameters is not None:
-            # Copy so the caller's job_config is left unchanged
-            job_config = copy.deepcopy(job_config) if job_config else QueryJobConfig()
-            job_config.query_parameters = list(query_parameters)
+        job_config = self._build_job_config(query_parameters, job_config)
 
         try:
             query_job = self.bq_client.query(query, job_config=job_config)
@@ -624,3 +653,56 @@ class BigQuery:
             return query_job
         except Exception as e:
             raise GbqException(str(e)) from e
+
+    def fetch_rows(
+        self,
+        query: str,
+        query_parameters: Sequence[QueryParameter] | None = None,
+        job_config: QueryJobConfig | None = None,
+        max_results: int | None = None,
+    ) -> RowIterator:
+        """
+        Function runs a SQL statement and returns its rows.
+
+        Unlike execute(), this uses the BigQuery jobs.query fast path, which runs short
+        queries in a single request and returns the first page of rows with the response,
+        instead of creating a job and polling it. Use execute() when you need the QueryJob
+        (job ID, statistics, destination table); use this when you only need the rows.
+
+        Args:
+            query (str):
+                BigQuery query string
+            query_parameters (Optional[Sequence[QueryParameter]]):
+                Parameters referenced by the query as `@name`; see execute().
+            job_config (Optional[QueryJobConfig]):
+                Extra job settings; see execute(). It is not modified.
+            max_results (Optional[int]):
+                Maximum number of rows to return.
+
+        Returns:
+            RowIterator: The query's rows.
+        """
+        job_config = self._build_job_config(query_parameters, job_config)
+
+        try:
+            return self.bq_client.query_and_wait(
+                query, job_config=job_config, max_results=max_results
+            )
+        except Exception as e:
+            raise GbqException(str(e)) from e
+
+    @staticmethod
+    def _build_job_config(
+        query_parameters: Sequence[QueryParameter] | None,
+        job_config: QueryJobConfig | None,
+    ) -> QueryJobConfig | None:
+        """
+        Function returns the job config to send, with query_parameters applied to a copy
+        so the caller's job_config is left unchanged.
+        """
+        if query_parameters is None:
+            return job_config
+
+        job_config = copy.deepcopy(job_config) if job_config else QueryJobConfig()
+        job_config.query_parameters = list(query_parameters)
+        return job_config
