@@ -7,6 +7,7 @@ docs_dir: docs
 nav:
   - Overview: index.md
   - Getting Started: getting-started.md
+  - API Reference: api.md
   - Development Guide: development-guide.md
   - Changelog: changelog.md
 theme: material
@@ -25,7 +26,7 @@ plugins:
       handlers:
         python:
           options:
-            docstring_style: "sphinx"
+            docstring_style: "google"
             heading_level: 3
             show_root_heading: True
             show_source: False

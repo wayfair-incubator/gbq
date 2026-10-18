@@ -7,7 +7,6 @@ on:
     branches:
       - "main"
 
-# The release is created with secrets.ACCESS_TOKEN, so GITHUB_TOKEN needs no write access.
 permissions:
   contents: read
 
@@ -19,6 +18,9 @@ jobs:
         startsWith(github.event.pull_request.title, 'Bump version') &&
         contains(github.event.pull_request.title, ' → ')
     environment: Create Release
+    permissions:
+      contents: write # create the release and its tag
+      actions: write # dispatch the Publish Release workflow
     steps:
       - name: Get new version
         id: get-new-version
@@ -39,13 +41,41 @@ jobs:
         run: |
           IS_PRERELEASE=$([[ "${NEW_VERSION}" == *-[a-z]* ]] && echo true || echo false)
           echo "result=${IS_PRERELEASE}" >> "${GITHUB_OUTPUT}"
+      - name: Check out the merge commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          persist-credentials: false
+      - name: Extract release notes from the CHANGELOG
+        env:
+          NEW_VERSION: ${{ steps.get-new-version.outputs.version }}
+        run: |
+          # The section between "## [<version>]" and the next "## [" heading
+          awk -v heading="## [${NEW_VERSION}]" '
+            index($0, heading) == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if [[ ! -s release-notes.md ]]; then
+            echo "::error::CHANGELOG.md has no '## [${NEW_VERSION}]' section."
+            exit 1
+          fi
       - name: Create Release
-        # Using full SHA for security
-        # https://docs.github.com/en/actions/learn-github-actions/security-hardening-for-github-actions#using-third-party-actions
+        # Created with GITHUB_TOKEN. Unlike a personal access token, it does not trigger the
+        # Publish Release workflow's release event, so that workflow is dispatched below.
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
           tag: v${{ steps.get-new-version.outputs.version }}
           name: v${{ steps.get-new-version.outputs.version }} Release
-          commit: main
+          # Tag exactly what was merged, even if main has moved on since
+          commit: ${{ github.event.pull_request.merge_commit_sha }}
+          bodyFile: release-notes.md
           prerelease: ${{ steps.is-prerelease.outputs.result }}
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ steps.get-new-version.outputs.version }}
+          PRERELEASE: ${{ steps.is-prerelease.outputs.result }}
+        run: |
+          gh workflow run publish_release.yml --repo "${GITHUB_REPOSITORY}" --ref main \
+            -f tag="${TAG}" -f prerelease="${PRERELEASE}"

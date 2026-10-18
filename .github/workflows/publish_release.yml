@@ -1,11 +1,27 @@
 name: Publish Release
 
-env:
-  PYTHON_VERSION: "3.12"
-
 on:
+  # A release created by hand, or by a personal access token
   release:
     types: [published]
+  # Dispatched by the Version Bump merged workflow, whose release (created with GITHUB_TOKEN)
+  # does not trigger the release event
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish, e.g. v2.0.0"
+        required: true
+        type: string
+      prerelease:
+        description: "Whether the release is a prerelease (it then doesn't become the docs' latest version)"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: "3.12"
+  RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
+  RELEASE_PRERELEASE: ${{ github.event_name == 'release' && format('{0}', github.event.release.prerelease) || inputs.prerelease }}
 
 # Least privilege by default; jobs that push or publish opt in to more.
 permissions:
@@ -16,9 +32,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # mike pushes to gh-pages
+    # One gh-pages deploy at a time, shared with the CI workflow's dev docs deploy
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     steps:
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -34,6 +56,8 @@ jobs:
         uses: ./.github/actions/publish-docs-with-mike
         with:
           new_version: true
+          release_tag: ${{ env.RELEASE_TAG }}
+          prerelease: ${{ env.RELEASE_PRERELEASE }}
 
   build-distributions:
     runs-on: ubuntu-latest
@@ -41,6 +65,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ env.RELEASE_TAG }}
           persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0

@@ -166,6 +166,10 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write # mike pushes to gh-pages
+    # One gh-pages deploy at a time, shared with the Publish Release docs deploy
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     steps:
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -13,7 +13,15 @@ inputs:
     description: |
       If true, publish a new docs version. When this release is NOT a prerelease, give this newly published version the
       alias "latest". Any existing version that currently uses the "latest" alias will have that alias removed.
-      If version_name is given, that value will be used. Otherwise the release tag will be used.
+      The version is release_tag without its leading "v".
+    required: false
+    default: "false"
+  release_tag:
+    description: "Tag of the release to publish, e.g. v2.0.0. Required when new_version is true."
+    required: false
+    default: ""
+  prerelease:
+    description: "Whether the release is a prerelease. Prereleases don't get the \"latest\" alias."
     required: false
     default: "false"
   commit_user_name:
@@ -30,9 +38,9 @@ runs:
     - run: "$GITHUB_ACTION_PATH/action.sh"
       shell: "bash"
       env:
-        USER_NAME: ${{ inputs.name }}
-        USER_EMAIL: ${{ inputs.email }}
+        USER_NAME: ${{ inputs.commit_user_name }}
+        USER_EMAIL: ${{ inputs.commit_user_email }}
         VERSION_NAME: ${{ inputs.version_name }}
         NEW_VERSION: ${{ inputs.new_version }}
-        IS_PRERELEASE: ${{ github.event.release.prerelease }}
-        RELEASE_TAG: ${{ github.event.release.tag_name }}
+        IS_PRERELEASE: ${{ inputs.prerelease }}
+        RELEASE_TAG: ${{ inputs.release_tag }}
