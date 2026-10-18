@@ -7,7 +7,7 @@ set -e
 # and --python-version pins the floor to the oldest version in the CI test matrix.
 LOCK_BODY=$(uv pip compile requirements.txt requirements-test.txt requirements-docs.txt \
     --universal \
-    --python-version 3.10 \
+    --python-version 3.11 \
     --no-annotate \
     --no-header)
 
