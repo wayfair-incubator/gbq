@@ -27,9 +27,8 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
-          requirements: "true"
-          test-requirements: "true"
-          docs-requirements: "true"
+          python-version: ${{ env.PYTHON_VERSION }}
+          docs: "true"
 
       - name: Push documentation changes
         uses: ./.github/actions/publish-docs-with-mike

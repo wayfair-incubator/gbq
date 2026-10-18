@@ -19,11 +19,13 @@ services:
     <<: *devbox
     command: "docker/run_tests.sh --format-code"
 
-  lock-requirements:
+  # Update uv.lock after changing dependencies in pyproject.toml.
+  # Extra arguments are passed to `uv lock`, e.g. `docker compose run --rm lock --upgrade`.
+  lock:
     <<: *devbox
     user: root
-    entrypoint: "/bin/bash"
-    command: "docker/lock_requirements.sh"
+    entrypoint: [ "uv", "lock" ]
+    command: []
 
   # generate and serve the project documentation locally
   mkdocs: &mkdocs

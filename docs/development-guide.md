@@ -72,23 +72,39 @@ To customize / override a specific testing stage, please read the documentation 
 
 ### Building the Library
 
-`gbq` is [PEP 517][pep-517] compliant. [build][build] is used as the frontend tool for building the library.
-Setuptools is used as the build backend. `setup.cfg` contains the library metadata. A `setup.py` is also included to
-support an editable install.
+`gbq` is [PEP 517][pep-517] compliant. [uv][uv-docs] is used as the frontend tool for building the library
+(`uv build`), and [Hatchling][hatchling] is the build backend. `pyproject.toml` contains the library metadata.
 
-### Requirements
+### Dependencies
 
-* **requirements.lock** - Lists all direct dependencies (packages imported by the library).
-* **requirements-test.txt** - Lists all direct dependencies needed for development. This primarily covers dependencies needed to run the test suite & lints.
+All dependencies are declared in `pyproject.toml` and managed with [uv][uv-docs]:
+
+* **`[project] dependencies`** - Runtime dependencies of the library, installed by anyone who installs `gbq`.
+* **`[dependency-groups]`** - Development dependencies, pinned to exact versions:
+    * `test` - the test suite and lints
+    * `docs` - building and publishing the documentation
+    * `dev` - everything in `test` and `docs`, plus local debugging tools. This is the default group.
+* **`uv.lock`** - The fully resolved lock file for every supported Python version. CI and the devbox install from it
+  with `uv sync --locked`, which fails if it is out of date with `pyproject.toml`.
+
+After changing dependencies in `pyproject.toml`, update the lock file and rebuild the devbox:
+
+```bash
+docker compose run --rm lock
+docker compose build devbox
+```
+
+To upgrade every locked dependency to its latest allowed version, run `docker compose run --rm lock --upgrade`.
+Renovate also opens a weekly lock file maintenance pull request that does this.
 
 ## Publishing a New Version
 
 Once the package is ready to be released, there are a few things that need to be done:
 
 1. Start with a local clone of the repo on the default branch with a clean working tree.
-2. Have an environment configured for Python 3.9 or later.
+2. Have [uv][uv-docs] installed.
 3. Perform the version bump part name (`major`, `minor`, or `patch`).
-    Example: `hyperb-bump-it by minor`
+    Example: `uv run hyper-bump-it by minor`
 
     This wil create a new branch, updates all affected files with the new version, commit the changes to the branch, and 
     push the branch.
@@ -147,6 +163,7 @@ The pipeline runs the tests cases across each supported version of Python to ens
 [bandit-docs]: https://bandit.readthedocs.io/en/stable/
 [sem-ver]: https://semver.org/
 [pep-517]: https://www.python.org/dev/peps/pep-0517
-[build]: https://pypa-build.readthedocs.io/
+[uv-docs]: https://docs.astral.sh/uv/
+[hatchling]: https://hatch.pypa.io/latest/
 [pypi]: https://pypi.org/project/gbq/
 [codecov]: https://about.codecov.io/
