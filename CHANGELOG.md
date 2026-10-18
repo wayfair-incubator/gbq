@@ -66,6 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (a definition that is not a dict or list)
 
 ### Fixed
+- The documentation's changelog page showed the text `../CHANGELOG.md` instead of the
+  changelog, and the API reference page was missing. Both are restored
+- Merging a version bump pull request did not release: the workflow needed a personal
+  access token that wasn't configured. It now creates the release with the workflow's own
+  token and starts the publish workflow itself
 - Stored procedure arguments of type `ARRAY` or `STRUCT` were sent without an element type
   or fields, which BigQuery rejects. `data_type` now accepts full BigQuery types such as
   `ARRAY<INT64>` and `STRUCT<id INT64, tags ARRAY<STRING>>`, and invalid types raise
@@ -134,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
-- Use [hatch][hatch] for build backend.
+- Use [hatch](https://hatch.pypa.io/) for build backend.
 
 ## [1.0.4] - 2023-10-24
 

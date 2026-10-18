@@ -185,7 +185,7 @@ class BigQuery:
         bq_table: Table = self.bq_client.get_table(full_table_name)
         return bq_table
 
-    def delete_table_or_view(self, project: str, dataset: str, structure: str):
+    def delete_table_or_view(self, project: str, dataset: str, structure: str) -> bool:
         """
         Function deletes table or view.
 
@@ -209,16 +209,15 @@ class BigQuery:
 
     def get_routine(self, project: str, dataset: str, routine_name: str) -> Routine:
         """
-        Function returns a BigQuery Table object.
+        Function returns a BigQuery Routine object.
 
         Args:
-
             project (str):
                 Project bound to the operation.
             dataset (str):
-                ID of dataset containing the table.
+                ID of dataset containing the routine.
             routine_name (str):
-                ID of the structure, can be a table or a view.
+                ID of the routine.
 
         Returns:
             Routine: An object of BigQuery Routine.

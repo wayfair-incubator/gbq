@@ -102,8 +102,10 @@ Renovate also opens a weekly lock file maintenance pull request that does this.
 Releases are made by merging a version bump pull request created with [hyper-bump-it][hyper-bump-it]. The version
 lives in `pyproject.toml`; `gbq.__version__` is read from the installed package's metadata.
 
-1. Start with a local clone of the repo on the default branch with a clean working tree.
-2. Have [uv][uv-docs] installed.
+1. Make sure the `## [Unreleased]` section of `CHANGELOG.md` describes everything in the release, marking breaking
+   changes. The bump turns it into the new version's section, and that section becomes the GitHub release notes.
+2. Start with a local clone of the repo on the default branch with a clean working tree, and have [uv][uv-docs]
+   installed.
 3. Bump the version by part (`major`, `minor`, or `patch`), for example:
 
     ```bash
@@ -115,16 +117,43 @@ lives in `pyproject.toml`; `gbq.__version__` is read from the installed package'
 4. Create a pull request for the pushed branch, keeping the `Bump version: <old> → <new>` title.
 5. Get the pull request approved and merge it.
 
-Merging the pull request triggers the `Version Bump merged` workflow, which creates the GitHub release. The release
-triggers the `Publish Release` workflow, which builds the wheel and source distribution, publishes them to
-[PyPI][pypi], and publishes the documentation for the new version. A full release becomes the documentation's
-`latest` version.
+Merging the pull request starts the release:
 
-Don't create releases by hand: the files above would not be updated.
+1. The `Version Bump merged` workflow tags the merge commit as `v<version>`, creates the GitHub release with that
+   version's CHANGELOG section as its notes, and starts the `Publish Release` workflow for the tag.
+2. `Publish Release` checks out the tag and:
+    * publishes the documentation for the version with [mike][mike]. A full release becomes the documentation's
+      `latest` version; a prerelease (e.g. `2.1.0-rc.1`) doesn't.
+    * builds the wheel and source distribution and uploads them to [PyPI][pypi]. This job uses
+      [trusted publishing][trusted-publishing] and runs in the `Publish Release` environment, so it waits until a
+      repository maintainer approves it in the workflow run.
 
-!!! warning
-    The job that uploads to PyPI uses [trusted publishing][trusted-publishing] and runs in the `Publish Release`
-    environment, so it waits until a repository maintainer approves it.
+Don't create releases by hand: the version would not be updated in the files above. If publishing fails after the
+release was created, fix the cause and re-run the failed jobs, or start `Publish Release` again from the Actions tab
+(**Run workflow**, with the release tag, e.g. `v2.0.0`).
+
+### Documentation Deploys
+
+The documentation is published to GitHub Pages from the `gh-pages` branch with [mike][mike], one directory per
+version plus a `dev` version:
+
+* Every push to `main` rebuilds the `dev` documentation (the `update-dev-docs` job of the CI workflow).
+* Every release publishes its version, as described above.
+
+The two kinds of deploy share a concurrency group, so only one pushes to `gh-pages` at a time. To preview the
+documentation locally, run `docker compose run --rm --service-ports mkdocs` and open <http://localhost:8000>.
+
+### Repository Configuration
+
+The release relies on these settings outside the repository:
+
+* **GitHub environment `Publish Release`** with required reviewers, which gates the PyPI upload. It needs no secrets.
+* **PyPI trusted publisher** for the `gbq` project: repository `wayfair-incubator/gbq`, workflow
+  `publish_release.yml`, environment `Publish Release`.
+* **GitHub environment `Create Release`**, used by `Version Bump merged`. It needs no secrets: the release is created
+  with the workflow's own `GITHUB_TOKEN`.
+* **GitHub Pages** serving the `gh-pages` branch.
+* **Repository secret `CODECOV_TOKEN`** for coverage uploads in CI.
 
 ## Continuous Integration Pipeline
 
@@ -172,3 +201,4 @@ The pipeline runs the tests cases across each supported version of Python to ens
 [codecov]: https://about.codecov.io/
 [hyper-bump-it]: https://github.com/plannigan/hyper-bump-it
 [trusted-publishing]: https://docs.pypi.org/trusted-publishers/
+[mike]: https://github.com/jimporter/mike
