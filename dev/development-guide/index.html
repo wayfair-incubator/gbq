@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://wayfair-incubator.github.io/gbq/dev/development-guide/">
       
       
-        <link rel="prev" href="../getting-started/">
+        <link rel="prev" href="../api/">
       
       
         <link rel="next" href="../changelog/">
@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -281,6 +281,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -423,6 +450,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Publishing a New Version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentation-deploys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Deploys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repository-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repository Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -618,6 +673,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Publishing a New Version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentation-deploys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Deploys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repository-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repository Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -762,8 +845,10 @@ Renovate also opens a weekly lock file maintenance pull request that does this.<
 <p>Releases are made by merging a version bump pull request created with <a href="https://github.com/plannigan/hyper-bump-it">hyper-bump-it</a>. The version
 lives in <code>pyproject.toml</code>; <code>gbq.__version__</code> is read from the installed package's metadata.</p>
 <ol>
-<li>Start with a local clone of the repo on the default branch with a clean working tree.</li>
-<li>Have <a href="https://docs.astral.sh/uv/">uv</a> installed.</li>
+<li>Make sure the <code>## [Unreleased]</code> section of <code>CHANGELOG.md</code> describes everything in the release, marking breaking
+   changes. The bump turns it into the new version's section, and that section becomes the GitHub release notes.</li>
+<li>Start with a local clone of the repo on the default branch with a clean working tree, and have <a href="https://docs.astral.sh/uv/">uv</a>
+   installed.</li>
 <li>
 <p>Bump the version by part (<code>major</code>, <code>minor</code>, or <code>patch</code>), for example:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>hyper-bump-it<span class="w"> </span>by<span class="w"> </span>minor
@@ -774,16 +859,42 @@ lives in <code>pyproject.toml</code>; <code>gbq.__version__</code> is read from 
 5. Get the pull request approved and merge it.</p>
 </li>
 </ol>
-<p>Merging the pull request triggers the <code>Version Bump merged</code> workflow, which creates the GitHub release. The release
-triggers the <code>Publish Release</code> workflow, which builds the wheel and source distribution, publishes them to
-<a href="https://pypi.org/project/gbq/">PyPI</a>, and publishes the documentation for the new version. A full release becomes the documentation's
-<code>latest</code> version.</p>
-<p>Don't create releases by hand: the files above would not be updated.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The job that uploads to PyPI uses <a href="https://docs.pypi.org/trusted-publishers/">trusted publishing</a> and runs in the <code>Publish Release</code>
-environment, so it waits until a repository maintainer approves it.</p>
-</div>
+<p>Merging the pull request starts the release:</p>
+<ol>
+<li>The <code>Version Bump merged</code> workflow tags the merge commit as <code>v&lt;version&gt;</code>, creates the GitHub release with that
+   version's CHANGELOG section as its notes, and starts the <code>Publish Release</code> workflow for the tag.</li>
+<li><code>Publish Release</code> checks out the tag and:<ul>
+<li>publishes the documentation for the version with <a href="https://github.com/jimporter/mike">mike</a>. A full release becomes the documentation's
+  <code>latest</code> version; a prerelease (e.g. <code>2.1.0-rc.1</code>) doesn't.</li>
+<li>builds the wheel and source distribution and uploads them to <a href="https://pypi.org/project/gbq/">PyPI</a>. This job uses
+  <a href="https://docs.pypi.org/trusted-publishers/">trusted publishing</a> and runs in the <code>Publish Release</code> environment, so it waits until a
+  repository maintainer approves it in the workflow run.</li>
+</ul>
+</li>
+</ol>
+<p>Don't create releases by hand: the version would not be updated in the files above. If publishing fails after the
+release was created, fix the cause and re-run the failed jobs, or start <code>Publish Release</code> again from the Actions tab
+(<strong>Run workflow</strong>, with the release tag, e.g. <code>v2.0.0</code>).</p>
+<h3 id="documentation-deploys">Documentation Deploys</h3>
+<p>The documentation is published to GitHub Pages from the <code>gh-pages</code> branch with <a href="https://github.com/jimporter/mike">mike</a>, one directory per
+version plus a <code>dev</code> version:</p>
+<ul>
+<li>Every push to <code>main</code> rebuilds the <code>dev</code> documentation (the <code>update-dev-docs</code> job of the CI workflow).</li>
+<li>Every release publishes its version, as described above.</li>
+</ul>
+<p>The two kinds of deploy share a concurrency group, so only one pushes to <code>gh-pages</code> at a time. To preview the
+documentation locally, run <code>docker compose run --rm --service-ports mkdocs</code> and open <a href="http://localhost:8000">http://localhost:8000</a>.</p>
+<h3 id="repository-configuration">Repository Configuration</h3>
+<p>The release relies on these settings outside the repository:</p>
+<ul>
+<li><strong>GitHub environment <code>Publish Release</code></strong> with required reviewers, which gates the PyPI upload. It needs no secrets.</li>
+<li><strong>PyPI trusted publisher</strong> for the <code>gbq</code> project: repository <code>wayfair-incubator/gbq</code>, workflow
+  <code>publish_release.yml</code>, environment <code>Publish Release</code>.</li>
+<li><strong>GitHub environment <code>Create Release</code></strong>, used by <code>Version Bump merged</code>. It needs no secrets: the release is created
+  with the workflow's own <code>GITHUB_TOKEN</code>.</li>
+<li><strong>GitHub Pages</strong> serving the <code>gh-pages</code> branch.</li>
+<li><strong>Repository secret <code>CODECOV_TOKEN</code></strong> for coverage uploads in CI.</li>
+</ul>
 <h2 id="continuous-integration-pipeline">Continuous Integration Pipeline</h2>
 <p>The Continuous Integration (CI) Pipeline runs to confirm that the repository is in a good state. It will run when 
 someone creates a pull request or when they push new commits to the branch for an existing pull request. The pipeline
