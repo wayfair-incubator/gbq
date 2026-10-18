@@ -400,10 +400,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
+  <a href="#dependencies" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requirements
+        Dependencies
       
     </span>
   </a>
@@ -594,10 +594,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
+  <a href="#dependencies" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requirements
+        Dependencies
       
     </span>
   </a>
@@ -737,22 +737,35 @@ coverage rather than decreasing it.</p>
 <li><a href="https://bandit.readthedocs.io/en/stable/">Bandit</a></li>
 </ol>
 <h3 id="building-the-library">Building the Library</h3>
-<p><code>gbq</code> is <a href="https://www.python.org/dev/peps/pep-0517">PEP 517</a> compliant. <a href="https://pypa-build.readthedocs.io/">build</a> is used as the frontend tool for building the library.
-Setuptools is used as the build backend. <code>setup.cfg</code> contains the library metadata. A <code>setup.py</code> is also included to
-support an editable install.</p>
-<h3 id="requirements">Requirements</h3>
+<p><code>gbq</code> is <a href="https://www.python.org/dev/peps/pep-0517">PEP 517</a> compliant. <a href="https://docs.astral.sh/uv/">uv</a> is used as the frontend tool for building the library
+(<code>uv build</code>), and <a href="https://hatch.pypa.io/latest/">Hatchling</a> is the build backend. <code>pyproject.toml</code> contains the library metadata.</p>
+<h3 id="dependencies">Dependencies</h3>
+<p>All dependencies are declared in <code>pyproject.toml</code> and managed with <a href="https://docs.astral.sh/uv/">uv</a>:</p>
 <ul>
-<li><strong>requirements.lock</strong> - Lists all direct dependencies (packages imported by the library).</li>
-<li><strong>requirements-test.txt</strong> - Lists all direct dependencies needed for development. This primarily covers dependencies needed to run the test suite &amp; lints.</li>
+<li><strong><code>[project] dependencies</code></strong> - Runtime dependencies of the library, installed by anyone who installs <code>gbq</code>.</li>
+<li><strong><code>[dependency-groups]</code></strong> - Development dependencies, pinned to exact versions:<ul>
+<li><code>test</code> - the test suite and lints</li>
+<li><code>docs</code> - building and publishing the documentation</li>
+<li><code>dev</code> - everything in <code>test</code> and <code>docs</code>, plus local debugging tools. This is the default group.</li>
 </ul>
+</li>
+<li><strong><code>uv.lock</code></strong> - The fully resolved lock file for every supported Python version. CI and the devbox install from it
+  with <code>uv sync --locked</code>, which fails if it is out of date with <code>pyproject.toml</code>.</li>
+</ul>
+<p>After changing dependencies in <code>pyproject.toml</code>, update the lock file and rebuild the devbox:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>lock
+docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>devbox
+</code></pre></div>
+<p>To upgrade every locked dependency to its latest allowed version, run <code>docker compose run --rm lock --upgrade</code>.
+Renovate also opens a weekly lock file maintenance pull request that does this.</p>
 <h2 id="publishing-a-new-version">Publishing a New Version</h2>
 <p>Once the package is ready to be released, there are a few things that need to be done:</p>
 <ol>
 <li>Start with a local clone of the repo on the default branch with a clean working tree.</li>
-<li>Have an environment configured for Python 3.9 or later.</li>
+<li>Have <a href="https://docs.astral.sh/uv/">uv</a> installed.</li>
 <li>
 <p>Perform the version bump part name (<code>major</code>, <code>minor</code>, or <code>patch</code>).
-    Example: <code>hyperb-bump-it by minor</code></p>
+    Example: <code>uv run hyper-bump-it by minor</code></p>
 <p>This wil create a new branch, updates all affected files with the new version, commit the changes to the branch, and 
 push the branch.
 4. Create a new pull request for the pushed branch.
