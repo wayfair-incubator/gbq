@@ -300,6 +300,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#updating-existing-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating Existing Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -476,6 +487,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#updating-existing-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating Existing Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -573,6 +595,19 @@
 
 <span class="n">bq</span><span class="o">.</span><span class="n">create_or_update_structure</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="n">structure_id</span><span class="p">,</span> <span class="n">json_schema</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="updating-existing-tables">Updating Existing Tables</h3>
+<p><code>create_or_update_structure</code> creates the structure if it doesn't exist. Otherwise it
+updates it to match the definition, and skips the API call when nothing changed:</p>
+<ul>
+<li>The definition is the source of truth. Labels, description and clustering that the
+  definition omits are removed from the existing table or view.</li>
+<li>Schema fields keep every attribute in the definition, such as <code>policyTags</code>,
+  <code>precision</code> and <code>maxLength</code>.</li>
+<li>BigQuery cannot change an existing table's partitioning, except a time partition's
+  expiration. If the definition's partitioning differs in any other way,
+  <code>InvalidDefinitionException</code> is raised and the table is left unchanged; recreate the
+  table to change it.</li>
+</ul>
 <h3 id="authentication">Authentication</h3>
 <p><code>BigQuery</code> uses <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a> unless you pass credentials explicitly.
 Prefer this, or a <code>google.auth</code> credentials object, over long-lived service account keys:</p>
