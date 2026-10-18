@@ -72,6 +72,43 @@ def get_bq_schema_from_json_schema(source: list[dict]) -> list[SchemaField]:
     return schema
 
 
+# Standard SQL type names the API reports under their legacy names
+_TYPE_ALIASES = {
+    "INT64": "INTEGER",
+    "FLOAT64": "FLOAT",
+    "BOOL": "BOOLEAN",
+    "STRUCT": "RECORD",
+}
+
+
+def _normalize_schema_field(field: dict) -> dict:
+    """
+    Function normalizes an API representation of a schema field so that equivalent
+    fields compare equal: an empty description equals none, types and modes are
+    upper-cased with standard SQL aliases mapped, and mode defaults to NULLABLE.
+    """
+    normalized = dict(field)
+    if not normalized.get("description"):
+        normalized.pop("description", None)
+    field_type = str(normalized.get("type", "")).upper()
+    normalized["type"] = _TYPE_ALIASES.get(field_type, field_type)
+    normalized["mode"] = str(normalized.get("mode") or "NULLABLE").upper()
+    nested = [_normalize_schema_field(f) for f in normalized.pop("fields", None) or []]
+    if nested:
+        normalized["fields"] = nested
+    return normalized
+
+
+def schemas_equal(left: list[SchemaField], right: list[SchemaField]) -> bool:
+    """
+    Function returns whether two table schemas are equivalent. Any difference other
+    than the normalizations in _normalize_schema_field makes them unequal.
+    """
+    return [_normalize_schema_field(f.to_api_repr()) for f in left] == [
+        _normalize_schema_field(f.to_api_repr()) for f in right
+    ]
+
+
 def get_bq_schema_from_record(raw_data: dict) -> list[SchemaField]:
     """
     Function builds a BQ Table schema from raw data of the table.

@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   non-empty dataset. The default stays `True` and will change to `False` in the next
   major release
 
+- `fetch_rows()` runs a query through the BigQuery `jobs.query` fast path and returns
+  its rows, avoiding job creation and polling for short queries
+
+### Performance
+- `get_table_in_project()` lists tables for up to 8 datasets concurrently (configurable
+  with `max_workers`) instead of one dataset at a time
+- `delete_dataset()` and `delete_table_or_view()` make one API call instead of two
+- `create_or_update_structure()` skips the update call when an existing table or view
+  already matches the definition, and otherwise sends only the fields that changed.
+  This also avoids BigQuery's per-table metadata update rate limit when a pipeline
+  re-applies unchanged definitions
+
 ### Security
 - An invalid `svc_account` now raises `GbqException` instead of `json.JSONDecodeError`
   or `ValueError`, without chaining the original error, whose `doc` attribute held the
@@ -36,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (a definition that is not a dict or list)
 
 ### Fixed
+- `get_table_in_project()` is annotated as returning `TableListItem` objects, which is
+  what it has always returned, instead of `Table`
 - `from gbq import *` raised `TypeError`; `__all__` now lists `BigQuery`, `GbqException`
   and `InvalidDefinitionException`, which are also importable from `gbq` directly
 - `get_bq_schema_from_record` duplicated the previous field or raised `UnboundLocalError`

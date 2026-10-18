@@ -10,6 +10,7 @@ from gbq.helpers import (
     get_bq_credentials,
     get_bq_schema_from_json_schema,
     get_bq_schema_from_record,
+    schemas_equal,
 )
 
 
@@ -271,3 +272,49 @@ def test_get_bq_credentials_wrong_format():
 
     assert exc_info.value.__suppress_context__
     assert "SECRET" not in str(exc_info.value)
+
+
+def test_schemas_equal_ignores_api_differences():
+    ours = get_bq_schema_from_json_schema(
+        [
+            {"name": "id", "type": "integer"},
+            {
+                "name": "address",
+                "type": "RECORD",
+                "mode": "REPEATED",
+                "fields": [{"name": "street", "type": "STRING"}],
+            },
+        ]
+    )
+    from_api = [
+        SchemaField.from_api_repr({"name": "id", "type": "INT64", "mode": "NULLABLE"}),
+        SchemaField.from_api_repr(
+            {
+                "name": "address",
+                "type": "STRUCT",
+                "mode": "REPEATED",
+                "fields": [{"name": "street", "type": "STRING"}],
+            }
+        ),
+    ]
+
+    assert schemas_equal(ours, from_api)
+
+
+@pytest.mark.parametrize(
+    "other",
+    [
+        [SchemaField("id", "STRING")],
+        [SchemaField("id", "INTEGER", mode="REQUIRED")],
+        [SchemaField("id", "INTEGER", description="new")],
+        [SchemaField("id", "INTEGER"), SchemaField("name", "STRING")],
+        [],
+    ],
+)
+def test_schemas_equal_detects_changes(other):
+    assert not schemas_equal([SchemaField("id", "INTEGER")], other)
+
+
+def test_schemas_equal_is_order_sensitive():
+    a, b = SchemaField("a", "STRING"), SchemaField("b", "STRING")
+    assert not schemas_equal([a, b], [b, a])
