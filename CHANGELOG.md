@@ -37,6 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Python 3.10, which reached end of life on 2026-10-01
 
 ### Changed
+- `gbq.__version__` is read from the installed package's metadata, so `pyproject.toml` is
+  the single source of the version. It is `0.0.0+unknown` when `gbq` is imported from
+  source without being installed
+- Releases are made only through hyper-bump-it version bump pull requests; the unused
+  release-please configuration was removed, and the development guide describes the flow
 - When `create_or_update_structure()` updates an existing table or view, the definition
   is now the source of truth: labels, description and clustering that the definition
   omits are removed. Previously they could be set but never cleared
