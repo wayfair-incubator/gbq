@@ -3,6 +3,7 @@ from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 from google.cloud.bigquery import PartitionRange, QueryJob
 from google.cloud.bigquery.routine import RoutineArgument
+from pydantic import ValidationError
 
 from gbq.bigquery import BigQuery
 from gbq.dto import (
@@ -1018,3 +1019,108 @@ def test_update_keeps_policy_tags_and_precision(bq):
     # Previously the definition lost these attributes, so the schema always differed
     # and the update stripped the column's policy tags
     bq.bq_client.update_table.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "text, api_repr",
+    [
+        ("string", {"typeKind": "STRING"}),
+        ("json", {"typeKind": "JSON"}),
+        (
+            "ARRAY<INT64>",
+            {"typeKind": "ARRAY", "arrayElementType": {"typeKind": "INT64"}},
+        ),
+        (
+            "struct<id int64, tags ARRAY<STRING>>",
+            {
+                "typeKind": "STRUCT",
+                "structType": {
+                    "fields": [
+                        {"name": "id", "type": {"typeKind": "INT64"}},
+                        {
+                            "name": "tags",
+                            "type": {
+                                "typeKind": "ARRAY",
+                                "arrayElementType": {"typeKind": "STRING"},
+                            },
+                        },
+                    ]
+                },
+            },
+        ),
+        (
+            "ARRAY<STRUCT<DATE, STRING>>",
+            {
+                "typeKind": "ARRAY",
+                "arrayElementType": {
+                    "typeKind": "STRUCT",
+                    "structType": {
+                        "fields": [
+                            # The client sends unnamed STRUCT fields with a null name
+                            {"name": None, "type": {"typeKind": "DATE"}},
+                            {"name": None, "type": {"typeKind": "STRING"}},
+                        ]
+                    },
+                },
+            },
+        ),
+    ],
+)
+def test_routine_argument_types_sent_to_api(bq, text, api_repr):
+    bq.bq_client.get_routine.side_effect = NotFound("")
+    bq.bq_client.create_routine.side_effect = lambda routine: routine
+
+    routine = bq.create_or_update_structure(
+        "project",
+        "dataset",
+        "procedure",
+        {"body": "SELECT 1", "arguments": [{"name": "x", "data_type": text}]},
+    )
+
+    (argument,) = routine.arguments
+    assert argument.to_api_repr() == {"name": "x", "dataType": api_repr}
+
+
+@pytest.mark.parametrize(
+    "data_type, message",
+    [
+        ("ARRAY", "ARRAY needs an element type"),
+        ("STRUCT", "STRUCT needs fields"),
+        ("ARRAY<ARRAY<INT64>>", "ARRAY of ARRAY"),
+        ("ARRAY<INT64", "expected '>', found the end"),
+        ("STRUCT<>", "unexpected '>'"),
+        ("STRING(10)", "unexpected '\\('"),
+        ("ARRAY<NOPE>", "Invalid BigQueryDataType 'NOPE'"),
+    ],
+)
+def test_routine_argument_type_errors(data_type, message):
+    definition = {
+        "body": "SELECT 1",
+        "arguments": [{"name": "x", "data_type": data_type}],
+    }
+
+    with pytest.raises(InvalidDefinitionException, match=message):
+        BigQuery._get_structure(definition)
+
+
+def test_argument_data_type_is_top_level_kind():
+    argument = Argument(name="x", data_type="ARRAY<INT64>")
+
+    assert argument.data_type == BigQueryDataType.ARRAY
+    assert argument.sql_type.array_element_type.type_kind == BigQueryDataType.INT64
+
+
+def test_argument_rejects_array_enum_without_element_type():
+    with pytest.raises(ValidationError, match="ARRAY needs an element type"):
+        Argument(name="x", data_type=BigQueryDataType.ARRAY)
+
+
+def test_argument_round_trips_through_model_dump():
+    argument = Argument(name="x", data_type="STRUCT<id INT64>")
+
+    assert Argument.model_validate(argument.model_dump()) == argument
+
+
+def test_argument_requires_data_type():
+    with pytest.raises(ValidationError, match="data_type"):
+        Argument.model_validate({"name": "x"})

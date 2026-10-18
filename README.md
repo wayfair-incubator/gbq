@@ -55,6 +55,28 @@ updates it to match the definition, and skips the API call when nothing changed:
   `InvalidDefinitionException` is raised and the table is left unchanged; recreate the
   table to change it.
 
+### Stored Procedures
+
+A definition with a `body` creates or updates a SQL stored procedure. The body can be a
+string or a list of lines, and each argument's `data_type` can be any BigQuery type,
+including `ARRAY<...>` and `STRUCT<...>`:
+
+```python
+procedure = {
+    "body": [
+        "INSERT INTO `project_id.dataset_id.events` (user_id, tags)",
+        "SELECT user.id, tags FROM UNNEST([user])",
+    ],
+    "arguments": [
+        {"name": "user", "data_type": "STRUCT<id INT64, name STRING>"},
+        {"name": "tags", "data_type": "ARRAY<STRING>"},
+    ],
+    "description": "Records an event for a user",
+}
+
+bq.create_or_update_structure(project_id, dataset_id, "record_event", procedure)
+```
+
 ### Authentication
 
 `BigQuery` uses [Application Default Credentials][adc] unless you pass credentials explicitly.
