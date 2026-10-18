@@ -763,6 +763,19 @@ def test_update_view_skipped_when_query_unchanged(bq):
     bq.bq_client.update_table.assert_not_called()
 
 
+def test_update_view_sends_changed_query(bq):
+    view = bigquery.Table("project.dataset.view")
+    view.view_query = "SELECT 1"
+    bq.bq_client.get_table.return_value = view
+
+    bq.create_or_update_structure(
+        "project", "dataset", "view", {"view_query": "SELECT 2"}
+    )
+
+    bq.bq_client.update_table.assert_called_once_with(view, ["view_query"])
+    assert view.view_query == "SELECT 2"
+
+
 def test_fetch_rows_uses_query_and_wait(bq, mocker):
     rows = mocker.Mock()
     bq.bq_client.query_and_wait.return_value = rows
