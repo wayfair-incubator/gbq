@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from google.cloud.bigquery import SchemaField
 
-from gbq.exceptions import InvalidDefinitionException
+from gbq.exceptions import GbqException, InvalidDefinitionException
 from gbq.helpers import (
     _check_if_map,
     _map_raw_dictionary_to_bq_schema,
@@ -245,3 +245,29 @@ def test_get_bq_schema_from_raw_data_dictionary_tuple_of_int():
 def test_get_bq_schema_from_raw_data_dictionary_unsupported_type(value):
     with pytest.raises(InvalidDefinitionException, match="field 'amount'"):
         get_bq_schema_from_record({"request_id": 2, "amount": value})
+
+
+@pytest.mark.parametrize("value", ["not json", None, '{"private_key": "abc"'])
+def test_get_bq_credentials_invalid_json_does_not_leak_value(value):
+    with pytest.raises(
+        GbqException, match="not valid service account JSON"
+    ) as exc_info:
+        get_bq_credentials(value)
+
+    # The JSON error (which holds the full input in .doc) must not be chained
+    assert exc_info.value.__cause__ is None
+    assert exc_info.value.__suppress_context__
+    if value:
+        assert value not in str(exc_info.value)
+
+
+def test_get_bq_credentials_wrong_format():
+    key_json = '{"type": "service_account", "private_key": "SECRET"}'
+
+    with pytest.raises(
+        GbqException, match="expected service account format"
+    ) as exc_info:
+        get_bq_credentials(key_json)
+
+    assert exc_info.value.__suppress_context__
+    assert "SECRET" not in str(exc_info.value)

@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Support for Python 3.15
+- `BigQuery(credentials=...)` accepts any `google.auth` credentials object, and
+  `svc_account` is now optional: without either, Application Default Credentials are used
+- `execute()` accepts `query_parameters` (use these instead of formatting values into
+  SQL) and a `job_config`
+- `delete_dataset()` accepts `delete_contents`; pass `False` to refuse deleting a
+  non-empty dataset. The default stays `True` and will change to `False` in the next
+  major release
+
+### Security
+- An invalid `svc_account` now raises `GbqException` instead of `json.JSONDecodeError`
+  or `ValueError`, without chaining the original error, whose `doc` attribute held the
+  full key
 
 ### Removed
 - Support for Python 3.10, which reached end of life on 2026-10-01

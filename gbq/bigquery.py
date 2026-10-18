@@ -1,6 +1,17 @@
+import copy
+from collections.abc import Sequence
+
 from google.api_core.exceptions import NotFound
+from google.auth.credentials import Credentials
 from google.cloud import bigquery
-from google.cloud.bigquery import QueryJob
+from google.cloud.bigquery import (
+    ArrayQueryParameter,
+    QueryJob,
+    QueryJobConfig,
+    RangeQueryParameter,
+    ScalarQueryParameter,
+    StructQueryParameter,
+)
 from google.cloud.bigquery.dataset import DatasetListItem
 from google.cloud.bigquery.routine import Routine, RoutineArgument
 from google.cloud.bigquery.table import PartitionRange, Table
@@ -17,21 +28,53 @@ from gbq.dto import (
 from gbq.exceptions import GbqException, InvalidDefinitionException
 from gbq.helpers import get_bq_credentials, get_bq_schema_from_json_schema
 
+QueryParameter = (
+    ScalarQueryParameter
+    | ArrayQueryParameter
+    | StructQueryParameter
+    | RangeQueryParameter
+)
+
 
 class BigQuery:
     """
     BigQueryUtil represent a BigQuery Util resource.
 
+    Authentication uses, in order of precedence: `credentials`, then `svc_account`, then
+    Application Default Credentials (for example Workload Identity, an attached service
+    account, `GOOGLE_APPLICATION_CREDENTIALS`, or `gcloud auth application-default login`).
+    Prefer `credentials` or Application Default Credentials over long-lived service
+    account keys.
+
     Args:
-        svc_account (str):
-            Stringified JSON service account value.
+        svc_account (Optional[str]):
+            Stringified JSON service account key.
         project (Optional[str]):
             Project bound to the operation.
+        credentials (Optional[google.auth.credentials.Credentials]):
+            Credentials to use, e.g. from `google.auth.default()` or impersonation.
+
+    Raises:
+        GbqException: If both `svc_account` and `credentials` are given, or if
+            `svc_account` is not a valid service account key.
     """
 
-    def __init__(self, svc_account: str, project: str | None = None):
-        self.credentials = get_bq_credentials(svc_account)
-        self.bq_client = bigquery.Client(credentials=self.credentials, project=project)
+    def __init__(
+        self,
+        svc_account: str | None = None,
+        project: str | None = None,
+        *,
+        credentials: Credentials | None = None,
+    ):
+        if svc_account is not None and credentials is not None:
+            raise GbqException("Pass either svc_account or credentials, not both")
+
+        if svc_account is not None:
+            credentials = get_bq_credentials(svc_account)
+
+        # None means the client resolves Application Default Credentials itself
+        self.credentials = credentials
+        self.bq_client = bigquery.Client(credentials=credentials, project=project)
 
     def get_dataset_in_project(self, project: str) -> list[DatasetListItem]:
         """
@@ -48,7 +91,9 @@ class BigQuery:
         datasets: list[DatasetListItem] = list(self.bq_client.list_datasets())
         return datasets
 
-    def delete_dataset(self, project: str, dataset: str):
+    def delete_dataset(
+        self, project: str, dataset: str, *, delete_contents: bool = True
+    ) -> bool:
         """
         Function deletes a dataset.
 
@@ -57,6 +102,11 @@ class BigQuery:
                 Project bound to the operation.
             dataset (str):
                 ID of dataset containing the table.
+            delete_contents (bool):
+                Also delete every table, view and routine in the dataset. Pass False to
+                only delete an empty dataset; BigQuery then rejects deleting a non-empty
+                one. Defaults to True, which will change to False in the next major
+                release.
 
         Returns:
             Bool: Whether dataset was deleted or not.
@@ -65,7 +115,7 @@ class BigQuery:
 
         try:
             bq_structure = self.bq_client.get_dataset(dataset)
-            self.bq_client.delete_dataset(bq_structure, delete_contents=True)
+            self.bq_client.delete_dataset(bq_structure, delete_contents=delete_contents)
         except NotFound:
             return False
 
@@ -526,20 +576,47 @@ class BigQuery:
         range_partitioning.range_ = PartitionRange(**definition.range.__dict__)
         return range_partitioning
 
-    def execute(self, query: str) -> QueryJob:
+    def execute(
+        self,
+        query: str,
+        query_parameters: Sequence[QueryParameter] | None = None,
+        job_config: QueryJobConfig | None = None,
+    ) -> QueryJob:
         """
         Function return a QueryJob object after executing a SQL statement
+
+        Pass untrusted values as query_parameters and reference them in the query as
+        `@name`, rather than formatting them into the query string, to avoid SQL injection.
 
         Args:
             query (str):
                 BigQuery query string
+            query_parameters (Optional[Sequence[QueryParameter]]):
+                Parameters referenced by the query, e.g.
+                `bigquery.ScalarQueryParameter("name", "STRING", value)`.
+            job_config (Optional[QueryJobConfig]):
+                Extra job settings such as labels, dry_run or maximum_bytes_billed. It is
+                not modified; query_parameters replace any parameters it already has.
+
+        Examples:
+            bq.execute(
+                "SELECT * FROM `project.dataset.users` WHERE name = @name",
+                query_parameters=[
+                    bigquery.ScalarQueryParameter("name", "STRING", user_input)
+                ],
+            )
 
         Returns:
             QueryJob
                 An object of QueryJob.
         """
+        if query_parameters is not None:
+            # Copy so the caller's job_config is left unchanged
+            job_config = copy.deepcopy(job_config) if job_config else QueryJobConfig()
+            job_config.query_parameters = list(query_parameters)
+
         try:
-            query_job = self.bq_client.query(query)
+            query_job = self.bq_client.query(query, job_config=job_config)
 
             # Wait for query job to finish.
             query_job.result()
