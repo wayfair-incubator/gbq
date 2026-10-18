@@ -404,7 +404,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="[Unreleased]">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#200-2026-10-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [2.0.0] - 2026-10-18
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[2.0.0] - 2026-10-18">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -984,7 +995,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="[Unreleased]">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#200-2026-10-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [2.0.0] - 2026-10-18
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[2.0.0] - 2026-10-18">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1546,6 +1568,7 @@
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
 and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <h2 id="unreleased">[Unreleased]</h2>
+<h2 id="200-2026-10-18">[2.0.0] - 2026-10-18</h2>
 <h3 id="added">Added</h3>
 <ul>
 <li>Support for Python 3.15</li>
@@ -1554,9 +1577,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 <li><code>execute()</code> accepts <code>query_parameters</code> (use these instead of formatting values into
   SQL) and a <code>job_config</code></li>
 <li>
-<p><code>delete_dataset()</code> accepts <code>delete_contents</code>; pass <code>False</code> to refuse deleting a
-  non-empty dataset. The default stays <code>True</code> and will change to <code>False</code> in the next
-  major release</p>
+<p><code>delete_dataset()</code> accepts <code>delete_contents</code></p>
 </li>
 <li>
 <p><code>fetch_rows()</code> runs a query through the BigQuery <code>jobs.query</code> fast path and returns
@@ -1585,6 +1606,9 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 </ul>
 <h3 id="changed">Changed</h3>
 <ul>
+<li><strong>Breaking:</strong> <code>delete_dataset()</code> no longer deletes the tables, views and routines in a
+  dataset unless you pass <code>delete_contents=True</code>. By default BigQuery now refuses to
+  delete a non-empty dataset</li>
 <li><code>gbq.__version__</code> is read from the installed package's metadata, so <code>pyproject.toml</code> is
   the single source of the version. It is <code>0.0.0+unknown</code> when <code>gbq</code> is imported from
   source without being installed</li>

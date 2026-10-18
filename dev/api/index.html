@@ -1062,7 +1062,7 @@ List[Dict]:
 
 
 <h4 id="gbq.BigQuery.delete_dataset" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">delete_dataset</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delete_contents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">delete_dataset</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">delete_contents</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 </h4>
 
@@ -1124,14 +1124,13 @@ List[Dict]:
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Also delete every table, view and routine in the dataset. Pass False to
-only delete an empty dataset; BigQuery then rejects deleting a non-empty
-one. Defaults to True, which will change to False in the next major
-release.</p>
+                <p>Also delete every table, view and routine in the dataset. By default
+only an empty dataset is deleted, and BigQuery rejects deleting a
+non-empty one.</p>
               </div>
             </td>
             <td>
-                  <code>True</code>
+                  <code>False</code>
             </td>
           </tr>
       </tbody>
