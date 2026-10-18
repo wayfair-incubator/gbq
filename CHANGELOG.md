@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Invalid structure definitions now raise `InvalidDefinitionException` instead of a raw
+  `KeyError` (unknown partition, time or argument types) or a later `AttributeError`
+  (a definition that is not a dict or list)
+
+### Fixed
+- `from gbq import *` raised `TypeError`; `__all__` now lists `BigQuery`, `GbqException`
+  and `InvalidDefinitionException`, which are also importable from `gbq` directly
+- `get_bq_schema_from_record` duplicated the previous field or raised `UnboundLocalError`
+  for `None` values; nulls now map to a `NULLABLE STRING` field, and unsupported value
+  types raise `InvalidDefinitionException`
+- Parsing a structure definition no longer mutates the caller's input dictionaries
+
 ## [1.1.0] - 2025-11-02
 
 ### Added

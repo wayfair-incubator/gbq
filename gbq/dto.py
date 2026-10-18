@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypeVar
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -39,6 +40,23 @@ class BigQueryDataType(Enum):
     STRUCT = "STRUCT"
 
 
+E = TypeVar("E", bound=Enum)
+
+
+def _enum_member(enum_cls: type[E], name: str) -> E:
+    """
+    Function looks up an enum member by name, raising ValueError (which pydantic reports
+    as a ValidationError) instead of KeyError when the name is not valid.
+    """
+    try:
+        return enum_cls[name]
+    except KeyError:
+        valid = ", ".join(enum_cls.__members__)
+        raise ValueError(
+            f"Invalid {enum_cls.__name__} '{name}'. Expected one of: {valid}"
+        ) from None
+
+
 class TimeDefinition(BaseModel):
     type: TimeType
     expirationMs: str | None = None
@@ -48,7 +66,7 @@ class TimeDefinition(BaseModel):
     @classmethod
     def str_or_list_(cls, data):
         if isinstance(data, dict) and isinstance(data.get("type"), str):
-            data["type"] = TimeType[data.get("type", "").upper()]
+            data = {**data, "type": _enum_member(TimeType, data["type"].upper())}
         return data
 
 
@@ -71,7 +89,7 @@ class Partition(BaseModel):
     @classmethod
     def convert_type(cls, data):
         if isinstance(data, dict) and isinstance(data.get("type"), str):
-            data["type"] = PartitionType[data.get("type", "").lower()]
+            data = {**data, "type": _enum_member(PartitionType, data["type"].lower())}
         return data
 
 
@@ -83,7 +101,10 @@ class Argument(BaseModel):
     @classmethod
     def str_or_list_(cls, data):
         if isinstance(data, dict) and isinstance(data.get("data_type"), str):
-            data["data_type"] = BigQueryDataType[data.get("data_type", "").upper()]
+            data = {
+                **data,
+                "data_type": _enum_member(BigQueryDataType, data["data_type"].upper()),
+            }
         return data
 
 
@@ -103,11 +124,11 @@ class Structure(BaseModel):
     def validate_type(cls, data):
         if isinstance(data, dict) and not data.get("type", None):
             if data.get("view_query"):
-                data["type"] = StructureType.view
+                data = {**data, "type": StructureType.view}
             elif data.get("body"):
-                data["type"] = StructureType.stored_procedure
+                data = {**data, "type": StructureType.stored_procedure}
             else:
-                data["type"] = StructureType.table
+                data = {**data, "type": StructureType.table}
         return data
 
     @model_validator(mode="before")
@@ -118,5 +139,5 @@ class Structure(BaseModel):
             and isinstance(data.get("body"), list)
             and not [s for s in data.get("body") if not isinstance(s, str)]
         ):
-            data["body"] = "\n".join(data["body"])
+            data = {**data, "body": "\n".join(data["body"])}
         return data

@@ -4,6 +4,7 @@ from google.cloud.bigquery import QueryJob
 from google.cloud.bigquery.dataset import DatasetListItem
 from google.cloud.bigquery.routine import Routine, RoutineArgument
 from google.cloud.bigquery.table import PartitionRange, Table
+from pydantic import ValidationError
 
 from gbq.dto import (
     Partition,
@@ -309,13 +310,25 @@ class BigQuery:
 
         Returns:
             Structure: An object of Structure.
-        """
-        if isinstance(json_schema, dict):
-            return Structure(**json_schema)
-        elif isinstance(json_schema, list):
-            return Structure(**{"schema": json_schema})  # type: ignore[arg-type]
 
-        return  # type: ignore
+        Raises:
+            InvalidDefinitionException: If json_schema is not a dict or list, or does
+                not describe a valid structure.
+        """
+        if isinstance(json_schema, list):
+            json_schema = {"schema": json_schema}
+        elif not isinstance(json_schema, dict):
+            raise InvalidDefinitionException(
+                "Structure definition must be a dict or a list of schema fields, "
+                f"got {type(json_schema).__name__}"
+            )
+
+        try:
+            return Structure.model_validate(json_schema)
+        except ValidationError as e:
+            raise InvalidDefinitionException(
+                f"Invalid structure definition: {e}"
+            ) from e
 
     def _handle_create_structure(
         self, dataset: str, project: str, structure_id: str, structure: Structure

@@ -1,5 +1,6 @@
 from gbq.bigquery import BigQuery
+from gbq.exceptions import GbqException, InvalidDefinitionException
 
 __version__ = "1.1.0"
 __author__ = "Jash Parekh <jparekh1@wayfair.com>"
-__all__ = [BigQuery]  # type: ignore
+__all__ = ["BigQuery", "GbqException", "InvalidDefinitionException"]
