@@ -20,5 +20,13 @@
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 6am on monday"]
-  }
+  },
+
+  "packageRules": [
+    {
+      "description": "Update every uv reference together: the devbox image and the version setup-uv installs in CI",
+      "matchDepNames": ["ghcr.io/astral-sh/uv", "astral-sh/uv"],
+      "groupName": "uv"
+    }
+  ]
 }
