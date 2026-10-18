@@ -6,15 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-18
+
 ### Added
 - Support for Python 3.15
 - `BigQuery(credentials=...)` accepts any `google.auth` credentials object, and
   `svc_account` is now optional: without either, Application Default Credentials are used
 - `execute()` accepts `query_parameters` (use these instead of formatting values into
   SQL) and a `job_config`
-- `delete_dataset()` accepts `delete_contents`; pass `False` to refuse deleting a
-  non-empty dataset. The default stays `True` and will change to `False` in the next
-  major release
+- `delete_dataset()` accepts `delete_contents`
 
 - `fetch_rows()` runs a query through the BigQuery `jobs.query` fast path and returns
   its rows, avoiding job creation and polling for short queries
@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Python 3.10, which reached end of life on 2026-10-01
 
 ### Changed
+- **Breaking:** `delete_dataset()` no longer deletes the tables, views and routines in a
+  dataset unless you pass `delete_contents=True`. By default BigQuery now refuses to
+  delete a non-empty dataset
 - `gbq.__version__` is read from the installed package's metadata, so `pyproject.toml` is
   the single source of the version. It is `0.0.0+unknown` when `gbq` is imported from
   source without being installed
