@@ -29,7 +29,8 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
-          test-requirements: "true"
+          python-version: ${{ env.PYTHON_VERSION }}
+          test: "true"
 
       - name: Run ruff linter
         run: ruff check gbq tests
@@ -44,10 +45,16 @@ jobs:
           uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
           with:
             persist-credentials: false
-        - name: Run mypy
-          uses: jashparekh/mypy-action@a4eb0d0a6f3dca7c6f03d7723f0f1cf12091fa19 # v3
+        - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
           with:
-            path: "gbq"
+            python-version: ${{ env.PYTHON_VERSION }}
+        - name: Install dependencies
+          uses: ./.github/actions/install-dependencies
+          with:
+            python-version: ${{ env.PYTHON_VERSION }}
+            test: "true"
+        - name: Run mypy
+          run: mypy gbq
 
   test:
     runs-on: ubuntu-latest
@@ -65,8 +72,8 @@ jobs:
         - name: Install dependencies
           uses: ./.github/actions/install-dependencies
           with:
-            requirements: "true"
-            test-requirements: "true"
+            python-version: ${{ matrix.python-version }}
+            test: "true"
 
         - name: Run pytest
           run: pytest --cov-report xml:coverage-${{ matrix.python-version }}.xml --junitxml=test-results-${{ matrix.python-version }}.xml
@@ -140,8 +147,8 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
-          requirements: "true"
-          docs-requirements: "true"
+          python-version: ${{ env.PYTHON_VERSION }}
+          docs: "true"
 
       - name: Build Docs
         run: mkdocs build --strict
@@ -170,8 +177,8 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/install-dependencies
         with:
-          requirements: "true"
-          docs-requirements: "true"
+          python-version: ${{ env.PYTHON_VERSION }}
+          docs: "true"
 
       - name: Push documentation changes
         uses: ./.github/actions/publish-docs-with-mike

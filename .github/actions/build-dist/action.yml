@@ -3,6 +3,12 @@ description: "Build a wheel and sdist for the package"
 runs:
   using: "composite"
   steps:
+    - name: "Install uv"
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      with:
+        version: "0.12.21"
+
     - name: "Build wheel"
-      run: "$GITHUB_ACTION_PATH/action.sh"
+      # Builds in an isolated environment using the backend pinned in [build-system]
+      run: "uv build --sdist --wheel --out-dir dist/"
       shell: "bash"

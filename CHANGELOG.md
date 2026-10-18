@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Upgraded `pydantic` to 2.14.1 and `google-crc32c` to 1.9.0, which ship Python
   3.15 wheels
+- Development dependencies moved from `requirements*.txt` and `requirements.lock` to
+  `[dependency-groups]` in `pyproject.toml`, locked in `uv.lock` for every supported Python
+- CI, the devbox image and distribution builds now install a pinned uv instead of an
+  unpinned install script, `pip install build` and a third-party mypy action
 - Invalid structure definitions now raise `InvalidDefinitionException` instead of a raw
   `KeyError` (unknown partition, time or argument types) or a later `AttributeError`
   (a definition that is not a dict or list)
