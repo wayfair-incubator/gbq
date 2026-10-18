@@ -311,6 +311,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stored-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stored Procedures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -498,6 +509,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stored-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stored Procedures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -608,6 +630,24 @@ updates it to match the definition, and skips the API call when nothing changed:
   <code>InvalidDefinitionException</code> is raised and the table is left unchanged; recreate the
   table to change it.</li>
 </ul>
+<h3 id="stored-procedures">Stored Procedures</h3>
+<p>A definition with a <code>body</code> creates or updates a SQL stored procedure. The body can be a
+string or a list of lines, and each argument's <code>data_type</code> can be any BigQuery type,
+including <code>ARRAY&lt;...&gt;</code> and <code>STRUCT&lt;...&gt;</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">procedure</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"body"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"INSERT INTO `project_id.dataset_id.events` (user_id, tags)"</span><span class="p">,</span>
+        <span class="s2">"SELECT user.id, tags FROM UNNEST([user])"</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="s2">"arguments"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"data_type"</span><span class="p">:</span> <span class="s2">"STRUCT&lt;id INT64, name STRING&gt;"</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"tags"</span><span class="p">,</span> <span class="s2">"data_type"</span><span class="p">:</span> <span class="s2">"ARRAY&lt;STRING&gt;"</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Records an event for a user"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">bq</span><span class="o">.</span><span class="n">create_or_update_structure</span><span class="p">(</span><span class="n">project_id</span><span class="p">,</span> <span class="n">dataset_id</span><span class="p">,</span> <span class="s2">"record_event"</span><span class="p">,</span> <span class="n">procedure</span><span class="p">)</span>
+</code></pre></div>
 <h3 id="authentication">Authentication</h3>
 <p><code>BigQuery</code> uses <a href="https://cloud.google.com/docs/authentication/application-default-credentials">Application Default Credentials</a> unless you pass credentials explicitly.
 Prefer this, or a <code>google.auth</code> credentials object, over long-lived service account keys:</p>
