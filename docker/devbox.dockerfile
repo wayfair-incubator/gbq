@@ -1,4 +1,4 @@
-FROM python:3.15-bookworm@sha256:13bea455a1e08474da9641034dd9c35c33cd9899ad0c86ff7d831023acc6003d
+FROM python:3.15-bookworm@sha256:4f531c055767345fb2391f9def4613624805139ffc2d7472af9021935277f4d9
 
 # Pinned uv binary, copied from the official image instead of piping an install script to sh
 COPY --from=ghcr.io/astral-sh/uv:0.13.4@sha256:9f130421e930bfbdc563c00740466603f8723158e90297d07957c2294640262b /uv /uvx /usr/local/bin/
