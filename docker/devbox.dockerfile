@@ -1,7 +1,7 @@
 FROM python:3.15-bookworm@sha256:9444f9c4fdfc3fc18c98cb211c2d2021719fcd619dfa423e77d67334fbad9400
 
 # Pinned uv binary, copied from the official image instead of piping an install script to sh
-COPY --from=ghcr.io/astral-sh/uv:0.13.4@sha256:9f130421e930bfbdc563c00740466603f8723158e90297d07957c2294640262b /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5@sha256:32a7bb39b496babbd997b0a39a4d66c126bdaf5661b302bf6f06abda8deca6ff /uv /uvx /usr/local/bin/
 
 ARG _USER="gbq"
 ARG _UID="1000"

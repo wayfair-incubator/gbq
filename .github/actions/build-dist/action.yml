@@ -7,7 +7,7 @@ runs:
       uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
       with:
         # Kept in step with the devbox image by the "uv" Renovate group (renovate.json)
-        version: "0.13.4"
+        version: "0.13.5"
 
     - name: "Build wheel"
       # Builds in an isolated environment using the backend pinned in [build-system]
