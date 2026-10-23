@@ -49,7 +49,7 @@ docs = [
     "markdown-include==0.8.1",
     "mike==2.2.0",
     "mkdocs==1.6.1",
-    "mkdocs-autorefs==1.4.4",
+    "mkdocs-autorefs==1.4.5",
     "mkdocs-material==9.7.7",
     "mkdocstrings[python]==1.0.8",
 ]
