@@ -19,7 +19,7 @@ runs:
       uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       with:
         # Kept in step with the devbox image by the "uv" Renovate group (renovate.json)
-        version: "0.13.5"
+        version: "0.13.6"
         python-version: ${{ inputs.python-version }}
         activate-environment: "true"
 
