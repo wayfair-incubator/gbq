@@ -343,10 +343,12 @@ class BigQuery:
                     bq_structure.schema = schema
                 if self._update_partitioning(bq_structure, structure.partition):
                     fields_to_update.append("time_partitioning")
-            elif structure.type == StructureType.view:
-                if structure.view_query != bq_structure.view_query:
-                    fields_to_update.append("view_query")
-                    bq_structure.view_query = structure.view_query
+            elif (
+                structure.type == StructureType.view
+                and structure.view_query != bq_structure.view_query
+            ):
+                fields_to_update.append("view_query")
+                bq_structure.view_query = structure.view_query
 
             current_labels = bq_structure.labels or {}
             if structure.labels != current_labels:
